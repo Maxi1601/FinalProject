@@ -11,15 +11,27 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.Toast;
+
+import com.yifat.finalproject.DataBase.FavoritesLogic;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements LocationListener, ResultsFragment.Callbacks {
+public class MainActivity extends AppCompatActivity implements LocationListener, ResultsFragment.Callbacks, PopupMenu.OnMenuItemClickListener {
 
     private String deviceType;
     private LocationManager locationManager;
-//    private ArrayList<Place> places;
+    //    private ArrayList<Place> places;
+    private FavoritesLogic favoritesLogic;
+    private String name;
+    private String address;
+    private double distance;
+    private String url;
+    private double latitude;
+    private double longitude;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         String json = PreferencesHelper.loadPlacesJson(this, Constants.JSON);
         Log.d("Json", json);
+
+        favoritesLogic = new FavoritesLogic(this);
 
 //        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -70,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
 
         // Get the device service for getting the user location:
-        locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 //        String provider = LocationManager.NETWORK_PROVIDER;
         String provider = LocationManager.GPS_PROVIDER;
         int milliseconds2Update = 5000; // 5 sec
@@ -79,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         try {
             locationManager.requestLocationUpdates(provider, milliseconds2Update, meters2Update, this);
         } catch (SecurityException e) {
-            Toast.makeText(this, e.getMessage(),Toast.LENGTH_LONG).show();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
     }
@@ -105,6 +119,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         return super.onOptionsItemSelected(item);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        favoritesLogic.open();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+//        favoritesLogic.close();
     }
 
     // Called when the location changed (meters or seconds):
@@ -136,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     }
 
-    public void loadLocation (){
+    public void loadLocation() {
 
         PreferencesHelper.loadLatitude(this, Constants.LATITUDE);
         PreferencesHelper.loadLongitude(this, Constants.LONGITUDE);
@@ -146,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         String message = "Location: " + latitude + ", " + longitude;
 
-        Toast.makeText(this, message,Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -164,10 +192,56 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
 
-            MapFragment fragment = (MapFragment)fragmentManager.findFragmentById(R.id.frameLayoutContainerMap);
-            fragment.setNewPlace(lat,lng);
+            MapFragment fragment = (MapFragment) fragmentManager.findFragmentById(R.id.frameLayoutContainerMap);
+            fragment.setNewPlace(lat, lng);
 
         }
     }
 
+    @Override
+    public void createPopup(View view, Place place) {
+
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.setOnMenuItemClickListener(this);
+        popup.inflate(R.menu.menu_place);
+        popup.show();
+
+    }
+
+    @Override
+    public void getPlace(Place place) {
+
+        name = place.getName();
+        address = place.getAddress();
+        distance = place.getDistance();
+        url = place.getUrl();
+        latitude = place.getLat();
+        longitude = place.getLng();
+
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.share:
+                break;
+            case R.id.addToFavorites:
+                Place place = new Place(name, address, distance, url, latitude, longitude);
+                long createdId = favoritesLogic.addFavorite(place);
+                Toast.makeText(this, "Favorite ID: " + createdId + " has been created", Toast.LENGTH_LONG).show();
+//                Intent intent = new Intent(this, FavoritesActivity.class);
+//                intent.putExtra(Constants.KEY_NAME, name);
+//                intent.putExtra(Constants.KEY_ADDRESS, address);
+//                intent.putExtra(Constants.KEY_DISTANCE, distance);
+//                intent.putExtra(Constants.KEY_URL, url);
+//                intent.putExtra(Constants.KEY_LATITUDE, latitude);
+//                intent.putExtra(Constants.KEY_LONGITUDE, longitude);
+//                startActivity(intent);
+                break;
+        }
+
+        return true;
+
+    }
 }

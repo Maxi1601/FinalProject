@@ -12,46 +12,4 @@
     android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-    <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:gravity="center">-->
-
-        <!--<Button-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:background="@null"-->
-            <!--android:text="Search"-->
-            <!--android:id="@+id/toolbar_search"-->
-            <!--android:gravity="center"-->
-            <!--android:layout_weight="1" />-->
-
-        <!--<Button-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:background="@null"-->
-            <!--android:text="Results"-->
-            <!--android:id="@+id/toolbar_Results"-->
-            <!--android:gravity="center"-->
-            <!--android:layout_weight="1"/>-->
-
-        <!--<Button-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:background="@null"-->
-            <!--android:text="Favorites"-->
-            <!--android:id="@+id/toolbar_Favorites"-->
-            <!--android:gravity="center"-->
-            <!--android:layout_weight="1"/>-->
-
-        <!--<Button-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:background="@null"-->
-            <!--android:text="Map"-->
-            <!--android:id="@+id/toolbar_map"-->
-            <!--android:layout_weight="1"/>-->
-
-    <!--</LinearLayout>-->
-
 </android.support.v7.widget.Toolbar>

@@ -21,14 +21,14 @@
             android:id="@+id/frameLayoutContainer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="30"
+            android:layout_weight="40"
             android:orientation="vertical" />
 
         <FrameLayout
             android:id="@+id/frameLayoutContainerMap"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="70"
+            android:layout_weight="60"
             android:orientation="vertical" />
 
     </LinearLayout>

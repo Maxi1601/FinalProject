@@ -3,6 +3,8 @@ package com.yifat.finalproject.DataBase;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
+
 import com.yifat.finalproject.Place;
 import java.util.ArrayList;
 
@@ -18,11 +20,15 @@ public class FavoritesLogic extends BaseLogic {
 
         contentValues.put(DB.Favorites.NAME, place.getName());
         contentValues.put(DB.Favorites.ADDRESS, place.getAddress());
+        contentValues.put(DB.Favorites.DISTANCE, place.getDistance());
         contentValues.put(DB.Favorites.URL, place.getUrl());
         contentValues.put(DB.Favorites.LATITUDE, place.getLat());
         contentValues.put(DB.Favorites.LONGITUDE, place.getLng());
 
         long createdId = dal.insert(DB.Favorites.TABLE_NAME, contentValues);
+
+        ArrayList<Place> places = getAllFavorites();
+        Log.d("Array", places.toString());
 
         return createdId;
     }
@@ -33,6 +39,7 @@ public class FavoritesLogic extends BaseLogic {
 
         contentValues.put(DB.Favorites.NAME, place.getName());
         contentValues.put(DB.Favorites.ADDRESS, place.getAddress());
+        contentValues.put(DB.Favorites.DISTANCE, place.getDistance());
         contentValues.put(DB.Favorites.URL, place.getUrl());
         contentValues.put(DB.Favorites.LATITUDE, place.getLat());
         contentValues.put(DB.Favorites.LONGITUDE, place.getLng());
@@ -60,16 +67,19 @@ public class FavoritesLogic extends BaseLogic {
         Cursor cursor = dal.getTable(DB.Favorites.TABLE_NAME, DB.Favorites.ALL_COLUMNS, where);
 
         while(cursor.moveToNext()) {
+            
+            Log.d("FavoritesLogic", cursor.toString());
 
             int idIndex = cursor.getColumnIndex(DB.Favorites.ID);
             long id = cursor.getLong(idIndex);
             String name = cursor.getString(cursor.getColumnIndex(DB.Favorites.NAME));
             String address = cursor.getString(cursor.getColumnIndex(DB.Favorites.ADDRESS));
+            double distance = cursor.getDouble(cursor.getColumnIndex(DB.Favorites.DISTANCE));
             String url = cursor.getString(cursor.getColumnIndex(DB.Favorites.URL));
             double latitude = cursor.getDouble(cursor.getColumnIndex(DB.Favorites.LATITUDE));
             double longitude = cursor.getDouble(cursor.getColumnIndex(DB.Favorites.LONGITUDE));
 
-            Place place = new Place(id, name, address, url, latitude, longitude);
+            Place place = new Place(id, name, address, distance, url, latitude, longitude);
 
             places.add(place);
         }

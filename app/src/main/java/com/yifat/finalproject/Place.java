@@ -5,6 +5,7 @@ public class Place{
     private long id;
     private String name;
     private String address;
+    private double distance;
     private String url;
     private double lat;
     private double lng;
@@ -12,17 +13,18 @@ public class Place{
     public Place() {
     }
 
-    public Place(String name, String address, String url, double lat, double lng) {
+    public Place(String name, String address, double distance, String url, double lat, double lng) {
         setName(name);
         setAddress(address);
+        setDistance(distance);
         setUrl(url);
         setLat(lat);
         setLng(lng);
 
     }
 
-    public Place(long id, String name, String address, String url, double lat, double lng) {
-        this(name, address, url, lat, lng);
+    public Place(long id, String name, String address, double distance, String url, double lat, double lng) {
+        this(name, address, distance, url, lat, lng);
         setId(id);
     }
 
@@ -50,6 +52,15 @@ public class Place{
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public double getDistance() {
+        return distance; }
+
+    public void setDistance(double distance) {
+        if (distance > 0) {
+            this.distance = distance;
+        }
     }
 
     public String getUrl() {

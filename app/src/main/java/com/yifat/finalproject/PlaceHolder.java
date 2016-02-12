@@ -1,17 +1,12 @@
 package com.yifat.finalproject;
 
-import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-/**
- * Created by Yifat on 2/1/16.
- */
-public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-    private Activity activity;
     private LinearLayout linearLayout;
     private TextView textViewName;
     private TextView textViewAddress;
@@ -32,6 +27,7 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
         this.callbacks = callbacks;
 
         linearLayout.setOnClickListener(this);
+        linearLayout.setOnLongClickListener(this);
 
     }
 
@@ -40,9 +36,9 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
 
         this.place = place;
         textViewName.setText(place.getName());
-        //TODO: Complete
         textViewAddress.setText(place.getAddress());
-        textViewDistance.setText("");
+        textViewDistance.setText("Distance: " + String.format("%.1f", place.getDistance()));
+
     }
 
     @Override
@@ -50,7 +46,15 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
         callbacks.onClick(place);
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        callbacks.onLongClick(v, place);
+        return true;
+    }
+
     public interface Callbacks {
         void onClick(Place place);
+        void onLongClick (View view, Place place);
     }
+
 }

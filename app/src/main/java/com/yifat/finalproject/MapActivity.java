@@ -1,7 +1,5 @@
 package com.yifat.finalproject;
 
-import android.app.Activity;
-//import android.app.Fragment;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,12 +28,6 @@ public class MapActivity extends AppCompatActivity {
         bundle.putDouble(Constants.LONGITUDE, lng);
         fragment.setArguments(bundle);
 
-//        getFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.frameLayoutContainer, fragment)
-//                .addToBackStack(null)
-//                .commit();
-
         android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
 
         fragmentManager.beginTransaction()
@@ -43,4 +35,5 @@ public class MapActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
+
 }

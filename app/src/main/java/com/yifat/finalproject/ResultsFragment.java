@@ -1,8 +1,7 @@
 package com.yifat.finalproject;
 
-
 import android.app.Activity;
-import android.net.ConnectivityManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,14 +10,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.Toast;
+
+import com.yifat.finalproject.DataBase.FavoritesLogic;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,19 +29,6 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Required empty public constructor
     public ResultsFragment() {
     }
-
-    // This makes sure that the container activity has implemented
-    // the callback interface. If not, it throws an exception
-//    public void onAttach(Activity activity) {
-//        super.onAttach(activity);
-//
-//        try {
-//            callbacks = (Callbacks) activity;
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                    + " must implement Callbacks");
-//        }
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,6 +76,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     @Override
     public void onClick(Place place) {
+
         Toast.makeText(this.getActivity(), place.getName() + ", " + place.getLat() + ", " + place.getLng(), Toast.LENGTH_LONG).show();
 
 //        Activity activity = getActivity();
@@ -102,6 +89,16 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         Log.d("Try", "here");
         if (callbacks != null) {
             callbacks.showCoordinates(place.getLat(), place.getLng());
+        }
+
+    }
+
+    @Override
+    public void onLongClick(View view, Place place) {
+
+        if (callbacks != null) {
+            callbacks.createPopup(view, place);
+            callbacks.getPlace(place);
         }
 
     }
@@ -137,6 +134,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
                 JSONObject jsonObjectResult = jsonArrayResults.getJSONObject(i);
 
                 String name = jsonObjectResult.getString("name");
+                String address = jsonObjectResult.getString("vicinity");
 
                 JSONObject jsonObjectGeometry = jsonObjectResult.getJSONObject("geometry");
                 JSONObject jsonObjectLocation = jsonObjectGeometry.getJSONObject("location");
@@ -144,7 +142,9 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
                 double lat = jsonObjectLocation.getDouble("lat");
                 double lng = jsonObjectLocation.getDouble("lng");
 
-                places.add(new Place(name, "", "", lat, lng));
+                double distance = calculateDistance(lat, lng);
+
+                places.add(new Place(name, address, distance, "", lat, lng));
 
             }
 
@@ -165,6 +165,8 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Callbacks design pattern:
     public interface Callbacks {
         void showCoordinates(double lat, double lng);
+        void createPopup(View view, Place place);
+        void getPlace (Place place);
     }
 
     @Override
@@ -173,7 +175,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         callbacks = null;
     }
 
-    private void updateList (ArrayList<Place> places) {
+    private void updateList(ArrayList<Place> places) {
         if (places == null) {
             return;
         }
@@ -183,6 +185,24 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         recyclerViewPlaces.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewPlaces.setAdapter(adapter);
         adapter.notifyDataSetChanged();
+    }
+
+    private double calculateDistance(double lat, double lng) {
+
+        Location userLocation = new Location("point A");
+
+        userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+
+        Location placeLocation = new Location("point B");
+
+        placeLocation.setLatitude(lat);
+        placeLocation.setLongitude(lng);
+
+        double distance = userLocation.distanceTo(placeLocation);
+
+        return distance;
+
     }
 
 }

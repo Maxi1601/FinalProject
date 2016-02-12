@@ -1,14 +1,16 @@
 package com.yifat.finalproject;
 
-/**
- * Created by Yifat on 2/2/16.
- */
 public class Constants {
 
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
     public static final String PLACE_NAME = "PlaceName";
     public static final String JSON = "Json";
-
+    public final static String KEY_NAME = "name";
+    public final static String KEY_ADDRESS = "address";
+    public final static String KEY_DISTANCE = "distance";
+    public final static String KEY_URL = "url";
+    public final static String KEY_LATITUDE = "latitude";
+    public final static String KEY_LONGITUDE = "longitude";
 
 }

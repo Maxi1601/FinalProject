@@ -29,17 +29,17 @@ public class PreferencesHelper {
         return Double.longBitsToDouble(sharedPreferences.getLong(key, 0));
     }
 
-    public static void savePlace(Context context, String key, String value) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PLACE_NAME, context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(key, value);
-        editor.commit();
-    }
-
-    public static String loadPlace(Context context, String key) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PLACE_NAME, context.MODE_PRIVATE);
-        return sharedPreferences.getString(key, "");
-    }
+//    public static void savePlace(Context context, String key, String value) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PLACE_NAME, context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        editor.putString(key, value);
+//        editor.commit();
+//    }
+//
+//    public static String loadPlace(Context context, String key) {
+//        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PLACE_NAME, context.MODE_PRIVATE);
+//        return sharedPreferences.getString(key, "");
+//    }
 
     public static void savePlacesJson (Context context, String key, String value) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.JSON, context.MODE_PRIVATE);

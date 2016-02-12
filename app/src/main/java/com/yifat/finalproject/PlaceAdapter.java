@@ -59,4 +59,10 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceHolder> implements P
     public void onClick(Place place) {
         callbacks.onClick(place);
     }
+
+    @Override
+    public void onLongClick(View view, Place place) {
+        callbacks.onLongClick(view, place);
+    }
+
 }
