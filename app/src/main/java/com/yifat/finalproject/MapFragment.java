@@ -41,13 +41,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-//        FragmentManager fm = getChildFragmentManager();
-//        supportMapFragment = (SupportMapFragment) fm.findFragmentById(R.id.fragmentMap);
-//        if (fragment == null) {
-//            fragment = SupportMapFragment.newInstance();
-//            fm.beginTransaction().replace(R.id.map_container, fragment).commit();
-//        }
     }
 
     @Override
@@ -84,7 +77,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    public void setNewPlace(double latitude, double longitude) {
+    public void setNewPlace(Place place) {
 
         SupportMapFragment supportMapFragment = ((SupportMapFragment) this.getChildFragmentManager()
                 .findFragmentById(R.id.fragmentMap));
@@ -95,11 +88,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             // Send the object for updating the UI:
             GoogleMap googleMap = supportMapFragment.getMap();
 
-            LatLng latLng = new LatLng(latitude, longitude);
+            LatLng latLng = new LatLng(place.getLat(), place.getLng());
 
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(latLng);
-            markerOptions.title("You are here...");
+            markerOptions.title(place.getName());
             googleMap.clear();
             googleMap.addMarker(markerOptions);
 

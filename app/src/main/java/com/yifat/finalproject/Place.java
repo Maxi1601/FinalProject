@@ -1,5 +1,7 @@
 package com.yifat.finalproject;
 
+import android.graphics.Bitmap;
+
 public class Place{
 
     private long id;
@@ -9,6 +11,7 @@ public class Place{
     private String url;
     private double lat;
     private double lng;
+    public Bitmap placeImage;
 
     public Place() {
     }
@@ -64,7 +67,8 @@ public class Place{
     }
 
     public String getUrl() {
-        return url;
+
+        return this.url;
     }
 
     public void setUrl(String url) {

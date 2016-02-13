@@ -1,6 +1,7 @@
 package com.yifat.finalproject;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -12,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.yifat.finalproject.DataBase.FavoritesLogic;
+import com.yifat.finalproject.Helpers.GeneralHelper;
+import com.yifat.finalproject.Helpers.PreferencesHelper;
+import com.yifat.finalproject.Helpers.Types;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +31,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     // Required empty public constructor
     public ResultsFragment() {
+        Log.d("avner","kugjhg");
     }
 
     @Override
@@ -49,7 +53,9 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        if (getActivity() == null) {
+            return;
+        }
         // if no internet, try to load the last saved result
         if (GeneralHelper.isInternetAvailable() == false) {
             String json = PreferencesHelper.loadPlacesJson(getActivity(), Constants.JSON);
@@ -63,15 +69,17 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         }
 
         // we have internet, load from google
-        try {
-            String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-            String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
-            URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&key=AIzaSyAUJBJanhO8bYq8Bkmi0Y-K-mC_BWkSfUs");
-            PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
-            placesNearByAsyncTask.execute(url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+            try {
+                String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+                String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+                URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
+                Log.d("ResultFragment", url.toString());
+                PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
+                placesNearByAsyncTask.execute(url);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
     }
 
     @Override
@@ -79,16 +87,9 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
         Toast.makeText(this.getActivity(), place.getName() + ", " + place.getLat() + ", " + place.getLng(), Toast.LENGTH_LONG).show();
 
-//        Activity activity = getActivity();
-//
-//        if (activity instanceof CoordinatesCallbacks) {
-//            Callbacks callbacks = (Callbacks) activity;
-//            callbacks.showCoordinates(place.getLat(), place.getLng());
-//        }
-
         Log.d("Try", "here");
         if (callbacks != null) {
-            callbacks.showCoordinates(place.getLat(), place.getLng());
+            callbacks.didClick(this, place);
         }
 
     }
@@ -97,31 +98,35 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     public void onLongClick(View view, Place place) {
 
         if (callbacks != null) {
-            callbacks.createPopup(view, place);
-            callbacks.getPlace(place);
+            callbacks.didLongClick(this, view, place);
         }
 
     }
 
     @Override
-    public void onAboutToStart() {
+    public void onAboutToStart(PlacesNearByAsyncTask task) {
 
     }
 
     @Override
-    public void onSuccess(String result) {
+    public void onSuccess(PlacesNearByAsyncTask task, String result) {
 
         if (result != null) {
-            PreferencesHelper.savePlacesJson(getActivity(), Constants.JSON, result);
             updateList(parseJson(result));
+            PreferencesHelper.savePlacesJson(getActivity(), Constants.JSON, result);
         }
+
+    }
+
+    @Override
+    public void onError(PlacesNearByAsyncTask task, String errorMessage) {
 
     }
 
     private ArrayList<Place> parseJson(String result) {
         try {
 
-            ArrayList<Place> places = new ArrayList<>();
+            ArrayList<Place>places = new ArrayList<>();
 
             JSONObject jsonObject = new JSONObject(result);
 
@@ -144,7 +149,25 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
                 double distance = calculateDistance(lat, lng);
 
-                places.add(new Place(name, address, distance, "", lat, lng));
+                String photoReference = null;
+
+                if (jsonObjectResult.has("photos")) {
+
+                    JSONArray jsonArrayPhotos = jsonObjectResult.getJSONArray("photos");
+
+                    if (jsonArrayPhotos != null && jsonArrayPhotos.length() > 0) {
+
+                        JSONObject jsonObjectPhotos = jsonArrayPhotos.getJSONObject(0);
+
+                        photoReference = jsonObjectPhotos.getString("photo_reference");
+
+                        photoReference = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=300&photoreference=" + photoReference + "&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA";
+                        Log.d("ParseJson", photoReference);
+                    }
+
+                }
+
+                places.add(new Place(name, address, distance, photoReference, lat, lng));
 
             }
 
@@ -157,16 +180,10 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         return null;
     }
 
-    @Override
-    public void onError(String errorMessage) {
-
-    }
-
     // Callbacks design pattern:
     public interface Callbacks {
-        void showCoordinates(double lat, double lng);
-        void createPopup(View view, Place place);
-        void getPlace (Place place);
+        void didClick(ResultsFragment fragment, Place place);
+        void didLongClick(ResultsFragment fragment,View pressedView, Place place);
     }
 
     @Override
@@ -180,19 +197,25 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             return;
         }
         PlaceAdapter adapter = new PlaceAdapter(getActivity(), places, this);
+        if (getActivity() == null ) {
+            return;
+        }
         RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
+        if (recyclerViewPlaces == null) {
+            return;
+        }
         // Create a linear list of items:
         recyclerViewPlaces.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewPlaces.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
 
-    private double calculateDistance(double lat, double lng) {
+    public double calculateDistance(double lat, double lng) {
 
         Location userLocation = new Location("point A");
 
-        userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+//         userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+//        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
 
         Location placeLocation = new Location("point B");
 
@@ -203,6 +226,27 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
         return distance;
 
+    }
+
+    public void searchByTerm (String term) {
+
+        try {
+            String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+            String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+            URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&name=" + term + "&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
+            Log.d("SearchByTerm", term);
+            PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
+            placesNearByAsyncTask.execute(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void changeDistanceFormat (Types.DistanceFormat format) {
+        RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
+        PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewPlaces.getAdapter();
+        placeAdapter.setDistanceFormat(format);
     }
 
 }

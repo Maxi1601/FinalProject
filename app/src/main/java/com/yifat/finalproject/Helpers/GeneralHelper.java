@@ -1,4 +1,4 @@
-package com.yifat.finalproject;
+package com.yifat.finalproject.Helpers;
 
 import java.net.InetAddress;
 
@@ -22,4 +22,5 @@ public class GeneralHelper {
         }
 
     }
+
 }

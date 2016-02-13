@@ -19,13 +19,13 @@
     <item
         android:id="@+id/km"
         android:orderInCategory="100"
-        android:title="KM"
+        android:title="Meters"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/miles"
         android:orderInCategory="100"
-        android:title="Miles"
+        android:title="Feet"
         app:showAsAction="never"/>
 
     <item

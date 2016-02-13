@@ -14,7 +14,12 @@ public class FavoritesLogic extends BaseLogic {
         super(activity);
     }
 
+    // Add a place to the favorites database. If the place is already in the DB - return -1. Otherwise returns the id of the added "favorite".
     public long addFavorite(Place place) {
+
+        if (isFavorite(place)) {
+            return -1;
+        }
 
         ContentValues contentValues = new ContentValues();
 
@@ -27,33 +32,30 @@ public class FavoritesLogic extends BaseLogic {
 
         long createdId = dal.insert(DB.Favorites.TABLE_NAME, contentValues);
 
-        ArrayList<Place> places = getAllFavorites();
-        Log.d("Array", places.toString());
-
         return createdId;
     }
 
-    public long updateFavorite(Place place) {
-
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.put(DB.Favorites.NAME, place.getName());
-        contentValues.put(DB.Favorites.ADDRESS, place.getAddress());
-        contentValues.put(DB.Favorites.DISTANCE, place.getDistance());
-        contentValues.put(DB.Favorites.URL, place.getUrl());
-        contentValues.put(DB.Favorites.LATITUDE, place.getLat());
-        contentValues.put(DB.Favorites.LONGITUDE, place.getLng());
-
-        String where = DB.Favorites.ID + "=" + place.getId();
-
-        long affectedRows = dal.update(DB.Favorites.TABLE_NAME, contentValues, where);
-
-        return affectedRows;
-    }
+//    public long updateFavorite(Place place) {
+//
+//        ContentValues contentValues = new ContentValues();
+//
+//        contentValues.put(DB.Favorites.NAME, place.getName());
+//        contentValues.put(DB.Favorites.ADDRESS, place.getAddress());
+//        contentValues.put(DB.Favorites.DISTANCE, place.getDistance());
+//        contentValues.put(DB.Favorites.URL, place.getUrl());
+//        contentValues.put(DB.Favorites.LATITUDE, place.getLat());
+//        contentValues.put(DB.Favorites.LONGITUDE, place.getLng());
+//
+//        String where = DB.Favorites.ID + "=" + place.getId();
+//
+//        long affectedRows = dal.update(DB.Favorites.TABLE_NAME, contentValues, where);
+//
+//        return affectedRows;
+//    }
 
     public long deleteFavorite(Place place) {
 
-        String where = DB.Favorites.ID + "=" + place.getId();
+        String where = DB.Favorites.NAME + "=" + "\"" + place.getName() + "\"" + " AND " + DB.Favorites.LATITUDE + "=" + place.getLat() + " AND " + DB.Favorites.LONGITUDE + "=" + place.getLng();
 
         long affectedRows = dal.delete(DB.Favorites.TABLE_NAME, where);
 
@@ -67,7 +69,7 @@ public class FavoritesLogic extends BaseLogic {
         Cursor cursor = dal.getTable(DB.Favorites.TABLE_NAME, DB.Favorites.ALL_COLUMNS, where);
 
         while(cursor.moveToNext()) {
-            
+
             Log.d("FavoritesLogic", cursor.toString());
 
             int idIndex = cursor.getColumnIndex(DB.Favorites.ID);
@@ -91,6 +93,16 @@ public class FavoritesLogic extends BaseLogic {
 
     public ArrayList<Place> getAllFavorites() {
         return getFavorites(null);
+    }
+
+    public boolean isFavorite(Place place) {
+        String where = DB.Favorites.NAME + "=" + "\"" + place.getName() + "\"" + " AND " + DB.Favorites.LATITUDE + "=" + place.getLat() + " AND " + DB.Favorites.LONGITUDE + "=" + place.getLng();
+        Log.d("FavoritesLogic", where);
+        Cursor cursor = dal.getTable(DB.Favorites.TABLE_NAME, DB.Favorites.ALL_COLUMNS, where);
+        if (cursor.getCount() > 0) {
+            return true;
+        }
+        return false;
     }
 
 }

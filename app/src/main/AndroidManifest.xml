@@ -15,11 +15,12 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCyiCLGKs252v5_F-tZ_GjbceHU14fe2w4" />
+            android:value="AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA" />
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

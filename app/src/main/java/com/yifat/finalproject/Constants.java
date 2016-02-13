@@ -12,5 +12,7 @@ public class Constants {
     public final static String KEY_URL = "url";
     public final static String KEY_LATITUDE = "latitude";
     public final static String KEY_LONGITUDE = "longitude";
+    public final static String POPUP_ADD = "Add to favorites";
+    public final static String POPUP_REMOVE = "Remove from favorites";
 
 }

@@ -8,9 +8,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/**
- * Created by Yifat on 2/2/16.
- */
 public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
 
     private Callbacks callbacks;
@@ -22,7 +19,7 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
 
     @Override
     protected void onPreExecute() {
-        callbacks.onAboutToStart();
+        callbacks.onAboutToStart(this);
     }
 
     @Override
@@ -41,6 +38,7 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
             int httpStatusCode = connection.getResponseCode();
 
             if(httpStatusCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                //TODO: figure out
                 errorMessage = "Figure out";
                 return null;
             }
@@ -81,16 +79,16 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         if(errorMessage != null) {
-            callbacks.onError(errorMessage);
+            callbacks.onError(this, errorMessage);
         }
         else {
-            callbacks.onSuccess(result);
+            callbacks.onSuccess(this, result);
         }
     }
 
     public interface Callbacks {
-        void onAboutToStart();
-        void onSuccess(String result);
-        void onError(String errorMessage);
+        void onAboutToStart(PlacesNearByAsyncTask task);
+        void onSuccess(PlacesNearByAsyncTask task, String result);
+        void onError(PlacesNearByAsyncTask task, String errorMessage);
     }
 }
