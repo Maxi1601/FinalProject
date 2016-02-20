@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.yifat.finalproject.Place;
+
 import java.util.ArrayList;
 
 public class FavoritesLogic extends BaseLogic {
@@ -14,7 +15,7 @@ public class FavoritesLogic extends BaseLogic {
         super(activity);
     }
 
-    // Add a place to the favorites database. If the place is already in the DB - return -1. Otherwise returns the id of the added "favorite".
+    // Add a place to the favorites database. If the place is already in the DB - return -1. Otherwise return the id of the added "favorite"
     public long addFavorite(Place place) {
 
         if (isFavorite(place)) {
@@ -35,24 +36,7 @@ public class FavoritesLogic extends BaseLogic {
         return createdId;
     }
 
-//    public long updateFavorite(Place place) {
-//
-//        ContentValues contentValues = new ContentValues();
-//
-//        contentValues.put(DB.Favorites.NAME, place.getName());
-//        contentValues.put(DB.Favorites.ADDRESS, place.getAddress());
-//        contentValues.put(DB.Favorites.DISTANCE, place.getDistance());
-//        contentValues.put(DB.Favorites.URL, place.getUrl());
-//        contentValues.put(DB.Favorites.LATITUDE, place.getLat());
-//        contentValues.put(DB.Favorites.LONGITUDE, place.getLng());
-//
-//        String where = DB.Favorites.ID + "=" + place.getId();
-//
-//        long affectedRows = dal.update(DB.Favorites.TABLE_NAME, contentValues, where);
-//
-//        return affectedRows;
-//    }
-
+    // Deleting one place from the favorites database
     public long deleteFavorite(Place place) {
 
         String where = DB.Favorites.NAME + "=" + "\"" + place.getName() + "\"" + " AND " + DB.Favorites.LATITUDE + "=" + place.getLat() + " AND " + DB.Favorites.LONGITUDE + "=" + place.getLng();
@@ -62,13 +46,23 @@ public class FavoritesLogic extends BaseLogic {
         return affectedRows;
     }
 
+    // Deleting all places from the favorites database
+    public long deleteAllFavorites(String where) {
+
+        long affectedRows = dal.delete(DB.Favorites.TABLE_NAME, where);
+
+        return affectedRows;
+
+    }
+
+    // Private method for getting one favorite or more according to condition
     private ArrayList<Place> getFavorites(String where) {
 
         ArrayList<Place> places = new ArrayList<>();
 
         Cursor cursor = dal.getTable(DB.Favorites.TABLE_NAME, DB.Favorites.ALL_COLUMNS, where);
 
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
 
             Log.d("FavoritesLogic", cursor.toString());
 
@@ -91,10 +85,12 @@ public class FavoritesLogic extends BaseLogic {
         return places;
     }
 
+    // Getting all the places in the favorites database
     public ArrayList<Place> getAllFavorites() {
         return getFavorites(null);
     }
 
+    // Checking if a place is already in the favorites database
     public boolean isFavorite(Place place) {
         String where = DB.Favorites.NAME + "=" + "\"" + place.getName() + "\"" + " AND " + DB.Favorites.LATITUDE + "=" + place.getLat() + " AND " + DB.Favorites.LONGITUDE + "=" + place.getLng();
         Log.d("FavoritesLogic", where);

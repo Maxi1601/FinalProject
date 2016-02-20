@@ -29,7 +29,7 @@
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/delete"
+        android:id="@+id/deleteAllFavorites"
         android:orderInCategory="101"
         android:title="Delete All Favorites"
         app:showAsAction="never"/>

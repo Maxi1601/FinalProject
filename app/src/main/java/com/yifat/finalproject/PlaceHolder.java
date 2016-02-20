@@ -9,15 +9,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.yifat.finalproject.Helpers.Types;
+import com.yifat.finalproject.Network.GetPlaceImageAsyncTask;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
 public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener, GetPlaceImageAsyncTask.Callbacks {
 
-    // region Properties
-    // ---------------------------------------------------------------------------------------------
-
+    //region Properties
     private RelativeLayout relativeLayout;
     private TextView textViewName;
     private TextView textViewAddress;
@@ -25,10 +24,9 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
     private ImageView imageViewPlace;
     private Callbacks callbacks;
     private Place place;
+    //endregion
 
-    // ---------------------------------------------------------------------------------------------
-    // endregion
-
+    //region Constructor
     public PlaceHolder(View relativeLayout, Callbacks callbacks) {
         super(relativeLayout);
         this.relativeLayout = (RelativeLayout)relativeLayout;
@@ -45,8 +43,9 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
         relativeLayout.setOnLongClickListener(this);
 
     }
+    //endregion
 
-    public void bindPlace(Place place) {
+    private void bindPlace(Place place) {
         bindPlace(place, Types.DistanceFormat.METER);
     }
     // Enter the object data into the ui:
@@ -56,12 +55,12 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
         textViewName.setText(place.getName());
         textViewAddress.setText(place.getAddress());
 
-        // default is meter
+        // Default Measure unit is meter
         double distance = place.getDistance();
         String units = "m";
 
         if (format == Types.DistanceFormat.FEET) {
-            // convert meters to feet
+            // Convert meters to feet
             distance = distance * 3.28084;
             units = "ft";
         }
@@ -73,10 +72,10 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
             this.imageViewPlace.setImageBitmap(place.placeImage);
         }
         else {
-            // put this specific image from recourse
+            // Put this specific image from recourse
             this.imageViewPlace.setImageResource(R.drawable.no_image);
 
-            // download image from the internet
+            // Download image from the internet
             callImageAsyncTask();
         }
 
@@ -93,8 +92,7 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
         return true;
     }
 
-    // region Asynctask GetPlaceImage
-    // ---------------------------------------------------------------------------------------------
+    //region Asynctask GetPlaceImage
     @Override
     public void onAboutToStart(GetPlaceImageAsyncTask task) {
 
@@ -116,9 +114,7 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
     public void onError(GetPlaceImageAsyncTask task, String errorMessage) {
 
     }
-
-    // ---------------------------------------------------------------------------------------------
-    // endregion
+    //endregion
 
     public interface Callbacks {
         void onClick(Place place);

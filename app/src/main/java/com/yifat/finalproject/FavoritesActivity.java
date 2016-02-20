@@ -1,81 +1,99 @@
 package com.yifat.finalproject;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.EditText;
 
-import com.yifat.finalproject.DataBase.FavoritesLogic;
+import com.yifat.finalproject.Helpers.Constants;
 import com.yifat.finalproject.Helpers.PopupHelper;
+import com.yifat.finalproject.Helpers.PreferencesHelper;
+import com.yifat.finalproject.Helpers.Types;
 
-import java.util.ArrayList;
+public class FavoritesActivity extends AppCompatActivity implements PopupHelper.FavoritesHelperCallback, FavoritesFragment.Callbacks{
 
-public class FavoritesActivity extends AppCompatActivity implements PlaceHolder.Callbacks, PopupHelper.FavoritesHelperCallback{
-
-    private FavoritesLogic favoritesLogic;
-    private ArrayList<Place> allFavorites;
+    FavoritesFragment favoritesFragment;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
 
-//        favoritesLogic = new FavoritesLogic(this);
+        // Set a toolbar to replace the action bar.
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        favoritesLogic = MainActivity.sharedFavoritesLogic;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        allFavorites = favoritesLogic.getAllFavorites();
+        Intent intent = new Intent();
 
-        updateList(allFavorites);
+        favoritesFragment = new FavoritesFragment();
+        favoritesFragment.callbacks = this;
 
-        Intent intent = getIntent();
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frameLayoutContainer, favoritesFragment)
+                .commit();
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        favoritesLogic.open();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-//        favoritesLogic.close();
-    }
-
-    @Override
-    public void onClick(Place place) {
+        // Hide keyboard
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
     }
 
-    @Override
-    public void onLongClick(View view, Place place) {
+    // Creating OPTIONS MENU:
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 
-        if (place == null) {
-            return;
+    // The possible actions of the menu:
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        Intent intent = null;
+
+        switch (item.getItemId()) {
+
+            case android.R.id.home:
+                intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+
+            case R.id.action_search:
+                EditText editTextSearch = (EditText) toolbar.findViewById(R.id.editTextSearch);
+                String term = editTextSearch.getText().toString();
+//                resultsFragment.searchByTerm(term);
+                break;
+
+            case R.id.action_favorites:
+                break;
+
+            case R.id.km:
+                Types.DistanceFormat format = Types.DistanceFormat.METER;
+                favoritesFragment.changeDistanceFormat(format);
+                break;
+
+            case R.id.miles:
+                favoritesFragment.changeDistanceFormat(Types.DistanceFormat.FEET);
+                break;
+
+            case R.id.deleteAllFavorites:
+                favoritesFragment.removeAllFavorites();
+                break;
+
         }
-        PopupHelper popupHelper = new PopupHelper(this, view, place);
-        popupHelper.callback = this;
 
-        popupHelper.showPopup();
+        return super.onOptionsItemSelected(item);
+
     }
-
-    private void updateList(ArrayList<Place> places) {
-        if (places == null) {
-            return;
-        }
-
-        PlaceAdapter adapter = new PlaceAdapter(this, places, this);
-        RecyclerView recyclerViewFavorites = (RecyclerView) this.findViewById(R.id.recyclerViewFavorites);
-        // Create a linear list of items:
-        recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewFavorites.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
-
 
     @Override
     public void didAddFavorite(PopupHelper popupHelper, Place favoritesPlace) {
@@ -83,7 +101,65 @@ public class FavoritesActivity extends AppCompatActivity implements PlaceHolder.
 
     @Override
     public void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace) {
-        allFavorites = favoritesLogic.getAllFavorites();
-        updateList(allFavorites);
+
+        favoritesFragment.removeFavorite();
+
     }
+
+    @Override
+    public void didClick(FavoritesFragment fragment, Place place) {
+
+//        if (deviceType.equals("phone")) {
+
+            Intent intent = new Intent(FavoritesActivity.this, MapActivity.class);
+            intent.putExtra(Constants.LATITUDE, place.getLat());
+            intent.putExtra(Constants.LONGITUDE, place.getLng());
+            startActivity(intent);
+
+//        } else if (deviceType.equals("tablet")) {
+//
+//            android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+//
+//            MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.frameLayoutContainerMap);
+//            mapFragment.setNewPlace(place);
+
+//        }
+    }
+
+    @Override
+    public void didLongClick(FavoritesFragment fragment, View pressedView, Place place) {
+
+        if (place == null) {
+            return;
+        }
+        PopupHelper popupHelper = new PopupHelper(this, pressedView, place);
+        popupHelper.callback = this;
+
+        popupHelper.showPopup();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.sharedFavoritesLogic.open();
+
+        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        getPackageManager()
+                .setComponentEnabledSetting(component,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        getPackageManager()
+                .setComponentEnabledSetting(component,
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP);
+    }
+
 }

@@ -1,8 +1,9 @@
 package com.yifat.finalproject;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -10,36 +11,38 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.yifat.finalproject.DataBase.FavoritesLogic;
+import com.yifat.finalproject.Helpers.Constants;
 import com.yifat.finalproject.Helpers.PopupHelper;
 import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, ResultsFragment.Callbacks, PopupHelper.FavoritesHelperCallback {
 
     private String deviceType;
     private LocationManager locationManager;
     public static FavoritesLogic sharedFavoritesLogic;
-    Toolbar toolbar;
-    ResultsFragment resultsFragment;
+    private Toolbar toolbar;
+    private ResultsFragment resultsFragment;
+    private ArrayList<Place> favoritePlaces;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // passing in null because otherwise crashes when rotating the device
         //TODO: Need to understand how to handle rotation with out deallocating all of the current fragmenets
-        super.onCreate(null);
-
-
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            resultsFragment = (ResultsFragment) getFragmentManager().getFragment(savedInstanceState, "fragment");
+        }
 
         // Set a toolbar to replace the action bar.
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -55,8 +58,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         MainActivity.sharedFavoritesLogic = new FavoritesLogic(this);
 
         deviceType = (String) findViewById(R.id.linearLayoutRoot).getTag();
-
-        Toast.makeText(this, "Running on " + deviceType, Toast.LENGTH_LONG).show();
 
         // Creating a resultFragment and setting "this" as the callback:
         resultsFragment = new ResultsFragment();
@@ -93,20 +94,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (deviceType != "phone") {
-            return;
-        }
-        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            LinearLayout ly = (LinearLayout)findViewById(R.id.linearLayoutRoot);
-
-        } else  {
-
-        }
-    }
-
     // Creating OPTIONS MENU:
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -120,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         switch (item.getItemId()) {
             case R.id.action_search:
-                Toast.makeText(MainActivity.this, "Search", Toast.LENGTH_SHORT).show();
                 EditText editTextSearch = (EditText) toolbar.findViewById(R.id.editTextSearch);
                 String term = editTextSearch.getText().toString();
                 resultsFragment.searchByTerm(term);
@@ -140,7 +126,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 resultsFragment.changeDistanceFormat(Types.DistanceFormat.FEET);
                 break;
 
-            case R.id.delete:
+            case R.id.deleteAllFavorites:
+                MainActivity.sharedFavoritesLogic.deleteAllFavorites(null);
                 break;
 
         }
@@ -152,13 +139,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     @Override
     protected void onResume() {
         super.onResume();
+
         MainActivity.sharedFavoritesLogic.open();
+
+        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        getPackageManager()
+                .setComponentEnabledSetting(component,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        favoritesLogic.close();
+
+        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        getPackageManager()
+                .setComponentEnabledSetting(component,
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                        PackageManager.DONT_KILL_APP);
     }
 
     // Called when the location changed (meters or seconds):
@@ -171,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         PreferencesHelper.saveLatitude(this, Constants.LATITUDE, latitude);
         PreferencesHelper.saveLongitude(this, Constants.LONGITUDE, longitude);
 
-        loadLocation();
+//        loadLocation();
 
     }
 
@@ -190,19 +189,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     }
 
-    public void loadLocation() {
-
-        PreferencesHelper.loadLatitude(this, Constants.LATITUDE);
-        PreferencesHelper.loadLongitude(this, Constants.LONGITUDE);
-
-        String latitude = String.valueOf(PreferencesHelper.loadLatitude(this, Constants.LATITUDE));
-        String longitude = String.valueOf(PreferencesHelper.loadLongitude(this, Constants.LONGITUDE));
-
-        String message = "Location: " + latitude + ", " + longitude;
-
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-
-    }
+//    public void loadLocation() {
+//
+//        PreferencesHelper.loadLatitude(this, Constants.LATITUDE);
+//        PreferencesHelper.loadLongitude(this, Constants.LONGITUDE);
+//
+//        String latitude = String.valueOf(PreferencesHelper.loadLatitude(this, Constants.LATITUDE));
+//        String longitude = String.valueOf(PreferencesHelper.loadLongitude(this, Constants.LONGITUDE));
+//
+//    }
 
     @Override
     public void didClick(ResultsFragment fragment, Place place) {
@@ -245,4 +240,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace) {
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        getFragmentManager().putFragment(outState,"fragment",resultsFragment);
+
+        super.onSaveInstanceState(outState);
+    }
+
 }
+

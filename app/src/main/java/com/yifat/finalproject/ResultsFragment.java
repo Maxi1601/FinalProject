@@ -1,7 +1,6 @@
 package com.yifat.finalproject;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -13,9 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.yifat.finalproject.Helpers.Constants;
 import com.yifat.finalproject.Helpers.GeneralHelper;
 import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
+import com.yifat.finalproject.Network.PlacesNearByAsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,10 +29,10 @@ import java.util.ArrayList;
 public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, PlacesNearByAsyncTask.Callbacks {
 
     public Callbacks callbacks;
+    private ArrayList<Place> places;
 
     // Required empty public constructor
     public ResultsFragment() {
-        Log.d("avner","kugjhg");
     }
 
     @Override
@@ -40,7 +41,6 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
         View view = inflater.inflate(R.layout.fragment_results, container, false);
 
-        // Inflate the layout for this fragment
         return view;
     }
 
@@ -53,9 +53,20 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         if (getActivity() == null) {
             return;
         }
+
+        if (savedInstanceState != null) {
+            //TODO: Complete
+            Log.d("OnActivityCreated", "savedInstanceState not null");
+            places = savedInstanceState.getParcelableArrayList(Constants.STATE_PLACES);
+            updateList(places);
+            return;
+//            Log.d("Results", "return");
+        }
+
         // if no internet, try to load the last saved result
         if (GeneralHelper.isInternetAvailable() == false) {
             String json = PreferencesHelper.loadPlacesJson(getActivity(), Constants.JSON);
@@ -66,28 +77,28 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             } else {
                 updateList(parseJson(json));
             }
+            return;
         }
 
         // we have internet, load from google
-            try {
-                String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-                String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
-                URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
-                Log.d("ResultFragment", url.toString());
-                PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
-                placesNearByAsyncTask.execute(url);
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+        try {
+            String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+            String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+            URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
+            Log.d("ResultFragment", url.toString());
+            PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
+            placesNearByAsyncTask.execute(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
     }
 
     @Override
     public void onClick(Place place) {
 
-        Toast.makeText(this.getActivity(), place.getName() + ", " + place.getLat() + ", " + place.getLng(), Toast.LENGTH_LONG).show();
+//        Toast.makeText(this.getActivity(), place.getName() + ", " + place.getLat() + ", " + place.getLng(), Toast.LENGTH_LONG).show();
 
-        Log.d("Try", "here");
         if (callbacks != null) {
             callbacks.didClick(this, place);
         }
@@ -126,7 +137,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     private ArrayList<Place> parseJson(String result) {
         try {
 
-            ArrayList<Place>places = new ArrayList<>();
+            places = new ArrayList<>();
 
             JSONObject jsonObject = new JSONObject(result);
 
@@ -183,7 +194,8 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Callbacks design pattern:
     public interface Callbacks {
         void didClick(ResultsFragment fragment, Place place);
-        void didLongClick(ResultsFragment fragment,View pressedView, Place place);
+
+        void didLongClick(ResultsFragment fragment, View pressedView, Place place);
     }
 
     @Override
@@ -197,7 +209,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             return;
         }
         PlaceAdapter adapter = new PlaceAdapter(getActivity(), places, this);
-        if (getActivity() == null ) {
+        if (getActivity() == null) {
             return;
         }
         RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
@@ -214,8 +226,8 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
         Location userLocation = new Location("point A");
 
-//         userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-//        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+        userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
 
         Location placeLocation = new Location("point B");
 
@@ -228,7 +240,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    public void searchByTerm (String term) {
+    public void searchByTerm(String term) {
 
         try {
             String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
@@ -243,10 +255,17 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    public void changeDistanceFormat (Types.DistanceFormat format) {
+    public void changeDistanceFormat(Types.DistanceFormat format) {
         RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
         PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewPlaces.getAdapter();
         placeAdapter.setDistanceFormat(format);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //TODO: Complete
+        outState.putParcelableArrayList(Constants.STATE_PLACES, places);
     }
 
 }

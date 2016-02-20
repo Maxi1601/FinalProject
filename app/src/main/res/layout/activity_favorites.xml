@@ -11,21 +11,21 @@
         layout="@layout/toolbar" />
 
     <TextView
-        android:id="@+id/textViewHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
-        android:gravity="center"
         android:text="My Favorites"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:gravity="center_horizontal"
+        android:id="@+id/textViewHeader"
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerViewFavorites"
+    <FrameLayout
+        android:id="@+id/frameLayoutContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".FavoritesActivity" />
+        android:orientation="vertical"
+        android:layout_below="@+id/toolbar"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 
 </LinearLayout>

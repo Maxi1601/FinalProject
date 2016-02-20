@@ -16,11 +16,12 @@
         android:id="@+id/editTextSearch"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:hint="Enter key words for search"
-        android:textSize="15sp"
+        android:hint="Enter key words"
+        android:textSize="20sp"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:focusable="true"
-        android:focusableInTouchMode="true"/>
+        android:focusableInTouchMode="true"
+        android:singleLine="true"/>
 
 </android.support.v7.widget.Toolbar>

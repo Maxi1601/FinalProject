@@ -1,4 +1,4 @@
-package com.yifat.finalproject;
+package com.yifat.finalproject.Network;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

@@ -12,9 +12,6 @@ import com.yifat.finalproject.Helpers.Types;
 
 import java.util.ArrayList;
 
-/**
- * Created by Yifat on 2/1/16.
- */
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceHolder> implements PlaceHolder.Callbacks{
 
     private Activity activity;
@@ -36,7 +33,6 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceHolder> implements P
         }
         this.distanceFormat = distanceFormat;
         notifyDataSetChanged();
-        Log.d("fffff", "fffff");
     }
 
     @Override
@@ -65,6 +61,9 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceHolder> implements P
 
     @Override
     public int getItemCount() {
+        if (places == null) {
+            return 0;
+        }
         return places.size();
     }
 
