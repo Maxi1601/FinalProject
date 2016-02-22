@@ -23,16 +23,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private boolean firstTime = true;
     private Place place;
-    private double id;
 
 //    private SupportMapFragment supportMapFragment;
 
     // Required empty public constructor
     public MapFragment() {
-        id = Math.random();
-        if (true) {
-            Log.d("fs", "fsdf");
-        }
+
     }
 
     // Called to have the fragment instantiate its user interface view:

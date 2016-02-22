@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
+import com.yifat.finalproject.Helpers.GeneralHelper;
 import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
 import com.yifat.finalproject.Network.PlacesNearByAsyncTask;
@@ -43,6 +44,10 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         Log.d("ResultsFragment", "setLocation");
         this.location = location;
         if (this.location == null) {
+            return;
+        }
+
+        if (this.places != null) {
             return;
         }
         try {

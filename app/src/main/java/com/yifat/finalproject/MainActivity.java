@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        // Hide keyboard
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         String json = PreferencesHelper.loadPlacesJson(this, Constants.JSON);

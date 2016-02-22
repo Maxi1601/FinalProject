@@ -15,13 +15,14 @@ import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
 import com.yifat.finalproject.Helpers.PopupHelper;
-import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
 
-public class FavoritesActivity extends AppCompatActivity implements PopupHelper.FavoritesHelperCallback, FavoritesFragment.Callbacks{
+public class FavoritesActivity extends AppCompatActivity implements PopupHelper.FavoritesHelperCallback, FavoritesFragment.Callbacks {
 
-    FavoritesFragment favoritesFragment;
     private Toolbar toolbar;
+    private String deviceType;
+    private FavoritesFragment favoritesFragment;
+    private MapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,10 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        deviceType = (String) findViewById(R.id.linearLayoutRoot).getTag();
+
         Intent intent = new Intent();
 
         favoritesFragment = new FavoritesFragment();
@@ -46,8 +51,18 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
                 .replace(R.id.frameLayoutContainer, favoritesFragment)
                 .commit();
 
-        // Hide keyboard
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        // If the device is tablet - show both fragments:
+        if (deviceType.equals("tablet")) {
+
+            mapFragment = new MapFragment();
+
+            android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frameLayoutContainerMap, mapFragment)
+                    .commit();
+
+        }
 
     }
 
@@ -111,21 +126,18 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
     @Override
     public void didClick(FavoritesFragment fragment, Place place) {
 
-//        if (deviceType.equals("phone")) {
+        if (deviceType.equals("phone")) {
 
-            Intent intent = new Intent(FavoritesActivity.this, MapActivity.class);
-            intent.putExtra(Constants.LATITUDE, place.getLat());
-            intent.putExtra(Constants.LONGITUDE, place.getLng());
-            startActivity(intent);
+        Intent intent = new Intent(FavoritesActivity.this, MapActivity.class);
+        intent.putExtra(Constants.LATITUDE, place.getLat());
+        intent.putExtra(Constants.LONGITUDE, place.getLng());
+        startActivity(intent);
 
-//        } else if (deviceType.equals("tablet")) {
-//
-//            android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
-//
-//            MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.frameLayoutContainerMap);
-//            mapFragment.setNewPlace(place);
+        } else if (deviceType.equals("tablet")) {
 
-//        }
+            mapFragment.setNewPlace(place);
+
+        }
     }
 
     @Override
@@ -146,7 +158,7 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
         super.onResume();
         MainActivity.sharedFavoritesLogic.open();
 
-        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -157,7 +169,7 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
     protected void onPause() {
         super.onPause();
 
-        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
                         PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
