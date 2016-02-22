@@ -2,6 +2,7 @@ package com.yifat.finalproject;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,46 +15,61 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.yifat.finalproject.Helpers.Constants;
+
+import java.util.Random;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private boolean firstTime = true;
-    private SupportMapFragment supportMapFragment;
+    private Place place;
+    private double id;
+
+//    private SupportMapFragment supportMapFragment;
 
     // Required empty public constructor
     public MapFragment() {
+        id = Math.random();
+        if (true) {
+            Log.d("fs", "fsdf");
+        }
     }
 
-    @Override
+    // Called to have the fragment instantiate its user interface view:
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
+        if (savedInstanceState != null) {
+            place = savedInstanceState.getParcelable(Constants.STATE_MAP);
+        }
+
         SupportMapFragment supportMapFragment = ((SupportMapFragment) this.getChildFragmentManager()
                 .findFragmentById(R.id.fragmentMap));
         supportMapFragment.getMapAsync(this);
 
         return view;
+
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
+    // Implementation of OnMapReadyCallback interface
     public void onMapReady(final GoogleMap googleMap) {
 
-//         Enable the user tracking
+        // Enable the user tracking
         googleMap.setMyLocationEnabled(true);
+
+        if (place != null) {
+            googleMap.setMyLocationEnabled(false);
+            setNewPlace(place);
+        }
 
         googleMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
 
             // this function will perform when the user location is changed:
             public void onMyLocationChange(Location location) {
-                if (!firstTime) {
+                if (!firstTime || place !=null) {
                     return;
                 }
                 // Take user location:
@@ -79,6 +95,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     public void setNewPlace(Place place) {
 
+        this.place = place;
+
         SupportMapFragment supportMapFragment = ((SupportMapFragment) this.getChildFragmentManager()
                 .findFragmentById(R.id.fragmentMap));
 
@@ -87,13 +105,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             // Send the object for updating the UI:
             GoogleMap googleMap = supportMapFragment.getMap();
+            googleMap.clear();
+
+            if ( place == null) {
+                googleMap.setMyLocationEnabled(true);
+                return;
+            }
 
             LatLng latLng = new LatLng(place.getLat(), place.getLng());
 
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(latLng);
             markerOptions.title(place.getName());
-            googleMap.clear();
             googleMap.addMarker(markerOptions);
 
             int zoom = 16;
@@ -102,6 +125,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             googleMap.animateCamera(cameraUpdate);
 
         }
+    }
+
+    // Called to retrieve per-instance state before the fragment is killed so that the state can be restored in onActivityCreated(Bundle)
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(Constants.STATE_MAP, place);
+
     }
 
 }

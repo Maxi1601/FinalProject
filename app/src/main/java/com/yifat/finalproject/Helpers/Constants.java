@@ -16,5 +16,6 @@ public class Constants {
     public final static String POPUP_REMOVE = "remove from favorites";
     public static final String FAVORITES = "favorites";
     public static final String STATE_PLACES = "state places";
+    public static final String STATE_MAP = "state map";
 
 }

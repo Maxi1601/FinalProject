@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
 
@@ -17,10 +20,16 @@ public class MapActivity extends AppCompatActivity {
     private double lng;
     private Toolbar toolbar;
 
-    @Override
+    // Called when the activity is starting. This is where most initialization should go:
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        if (savedInstanceState != null) {
+            fragment = getSupportFragmentManager().getFragment(savedInstanceState, "fragment");
+        } else {
+            fragment = new MapFragment();
+        }
 
         // Set a toolbar to replace the action bar.
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -33,8 +42,6 @@ public class MapActivity extends AppCompatActivity {
 
         lat = intent.getDoubleExtra(Constants.LATITUDE, 0.0);
         lng = intent.getDoubleExtra(Constants.LONGITUDE, 0.0);
-
-        fragment = new MapFragment();
 
         Bundle bundle = new Bundle();
         bundle.putDouble(Constants.LATITUDE, lat);
@@ -49,27 +56,81 @@ public class MapActivity extends AppCompatActivity {
                 .commit();
     }
 
-    @Override
+    // Creating OPTIONS MENU:
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    // The possible actions of the menu:
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        Intent intent = null;
+
+        switch (item.getItemId()) {
+
+            case android.R.id.home:
+                intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+
+            case R.id.action_search:
+                break;
+
+            case R.id.action_favorites:
+                intent = new Intent(this, FavoritesActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.km:
+                break;
+
+            case R.id.miles:
+                break;
+
+            case R.id.deleteAllFavorites:
+                MainActivity.sharedFavoritesLogic.deleteAllFavorites(null);
+                Toast.makeText(this, "All Favorites have been deleted", Toast.LENGTH_LONG).show();
+                break;
+
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    // Called after onRestoreInstanceState(Bundle), onRestart(), or onPause(), for the activity to start interacting with the user
     protected void onResume() {
         super.onResume();
+
         MainActivity.sharedFavoritesLogic.open();
 
-        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        // Enable BroadcastReceiver when the activity resumes:
+        ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                         PackageManager.DONT_KILL_APP);
+
     }
 
-    @Override
+    // Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed
     protected void onPause() {
         super.onPause();
 
-        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        // Disable BroadcastReceiver when the activity pauses:
+        ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
                         PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                         PackageManager.DONT_KILL_APP);
+
+    }
+
+    protected void onSaveInstanceState(Bundle outState) {
+
+        getSupportFragmentManager().putFragment(outState, "fragment", fragment);
+
+        super.onSaveInstanceState(outState);
     }
 
 }

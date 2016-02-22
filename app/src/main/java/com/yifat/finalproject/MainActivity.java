@@ -17,13 +17,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.yifat.finalproject.DataBase.FavoritesLogic;
 import com.yifat.finalproject.Helpers.Constants;
 import com.yifat.finalproject.Helpers.PopupHelper;
 import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, ResultsFragment.Callbacks, PopupHelper.FavoritesHelperCallback {
 
@@ -32,22 +31,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public static FavoritesLogic sharedFavoritesLogic;
     private Toolbar toolbar;
     private ResultsFragment resultsFragment;
-    private ArrayList<Place> favoritePlaces;
+    private MapFragment mapFragment;
 
-    @Override
+    // Called when the activity is starting. This is where most initialization should go:
     protected void onCreate(Bundle savedInstanceState) {
-        //TODO: Need to understand how to handle rotation with out deallocating all of the current fragmenets
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null) {
             resultsFragment = (ResultsFragment) getFragmentManager().getFragment(savedInstanceState, "fragment");
-        } else  {
+        } else {
             resultsFragment = new ResultsFragment();
             resultsFragment.callbacks = this;
         }
 
-        // Set a toolbar to replace the action bar.
+        // Set a toolbar to replace the action bar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -62,8 +60,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         deviceType = (String) findViewById(R.id.linearLayoutRoot).getTag();
 
-        // Creating a resultFragment and setting "this" as the callback:
-
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frameLayoutContainer, resultsFragment)
@@ -72,10 +68,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         // If the device is tablet - show both fragments:
         if (deviceType.equals("tablet")) {
 
+            if (savedInstanceState != null) {
+                mapFragment = (MapFragment) getSupportFragmentManager().getFragment(savedInstanceState, "mapFragment");
+            } else {
+                mapFragment = new MapFragment();
+            }
+
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
 
             fragmentManager.beginTransaction()
-                    .replace(R.id.frameLayoutContainerMap, new MapFragment())
+                    .replace(R.id.frameLayoutContainerMap, mapFragment)
                     .commit();
 
         }
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         try {
             locationManager.requestLocationUpdates(provider, milliseconds2Update, meters2Update, this);
         } catch (SecurityException e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.e("locationManager", "SecurityException " + e.toString());
         }
 
     }
@@ -129,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
             case R.id.deleteAllFavorites:
                 MainActivity.sharedFavoritesLogic.deleteAllFavorites(null);
+                Toast.makeText(this, "All Favorites have been deleted", Toast.LENGTH_LONG).show();
                 break;
 
         }
@@ -137,74 +140,58 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     }
 
-    @Override
+    // Called after onRestoreInstanceState(Bundle), onRestart(), or onPause(), for the activity to start interacting with the user
     protected void onResume() {
         super.onResume();
 
         MainActivity.sharedFavoritesLogic.open();
 
-        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        // Enable BroadcastReceiver when the activity resumes:
+        ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
                         PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                         PackageManager.DONT_KILL_APP);
     }
 
-    @Override
+    // Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed
     protected void onPause() {
         super.onPause();
 
-        ComponentName component=new ComponentName(this, PowerReceiver.class);
+        // Disable BroadcastReceiver when the activity pauses:
+        ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
                         PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                         PackageManager.DONT_KILL_APP);
     }
 
-    // Called when the location changed (meters or seconds):
-    @Override
+    // Called when the location changed (meters or seconds)
     public void onLocationChanged(Location location) {
+
         if (location == null) {
             return;
         }
         resultsFragment.setLocation(location);
         locationManager.removeUpdates(this);
-//        double latitude = location.getLatitude();
-//        double longitude = location.getLongitude();
-//
-//        PreferencesHelper.saveLatitude(this, Constants.LATITUDE, latitude);
-//        PreferencesHelper.saveLongitude(this, Constants.LONGITUDE, longitude);
-
-//        loadLocation();
 
     }
 
-    @Override
+    // Called when the provider status changes
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
     }
 
-    @Override
+    // Called when the provider is enabled by the user
     public void onProviderEnabled(String provider) {
-
+        Toast.makeText(this, provider + " has been enabled", Toast.LENGTH_LONG).show();
     }
 
-    @Override
+    // Called when the provider is disabled by the user
     public void onProviderDisabled(String provider) {
-
+        Toast.makeText(this, provider + " has been disabled", Toast.LENGTH_LONG).show();
     }
 
-//    public void loadLocation() {
-//
-//        PreferencesHelper.loadLatitude(this, Constants.LATITUDE);
-//        PreferencesHelper.loadLongitude(this, Constants.LONGITUDE);
-//
-//        String latitude = String.valueOf(PreferencesHelper.loadLatitude(this, Constants.LATITUDE));
-//        String longitude = String.valueOf(PreferencesHelper.loadLongitude(this, Constants.LONGITUDE));
-//
-//    }
-
-    @Override
+    // Implementation of ResultsFragment's Callbacks interface
     public void didClick(ResultsFragment fragment, Place place) {
 
         if (deviceType.equals("phone")) {
@@ -224,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
-    @Override
+    // Implementation of ResultsFragment's Callbacks interface
     public void didLongClick(ResultsFragment fragment, View view, Place place) {
 
         if (place == null) {
@@ -237,18 +224,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     }
 
-    @Override
+    // Implementation of PopupHelper's FavoritesHelperCallback interface
     public void didAddFavorite(PopupHelper popupHelper, Place favoritesPlace) {
     }
 
-    @Override
+    // Implementation of PopupHelper's FavoritesHelperCallback interface
     public void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace) {
     }
 
-    @Override
+    // Called to retrieve per-instance state before the activity is killed so that the state can be restored in onCreate(Bundle)
     protected void onSaveInstanceState(Bundle outState) {
 
-        getFragmentManager().putFragment(outState,"fragment",resultsFragment);
+        getFragmentManager().putFragment(outState, "fragment", resultsFragment);
+        if (mapFragment != null) {
+            getSupportFragmentManager().putFragment(outState, "mapFragment", mapFragment);
+        }
 
         super.onSaveInstanceState(outState);
     }

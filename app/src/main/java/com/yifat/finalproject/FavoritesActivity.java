@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
 import com.yifat.finalproject.Helpers.PopupHelper;
@@ -87,6 +88,7 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
 
             case R.id.deleteAllFavorites:
                 favoritesFragment.removeAllFavorites();
+                Toast.makeText(this, "All Favorites have been deleted", Toast.LENGTH_LONG).show();
                 break;
 
         }

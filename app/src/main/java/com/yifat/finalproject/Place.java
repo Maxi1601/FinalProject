@@ -5,7 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-public class Place implements Parcelable{
+public class Place implements Parcelable {
 
     private long id;
     private String name;
@@ -70,7 +70,8 @@ public class Place implements Parcelable{
     }
 
     public double getDistance() {
-        return distance; }
+        return distance;
+    }
 
     public void setDistance(double distance) {
         if (distance > 0) {
@@ -92,9 +93,7 @@ public class Place implements Parcelable{
     }
 
     public void setLat(double lat) {
-        if (lat > 0) {
-            this.lat = lat;
-        }
+        this.lat = lat;
     }
 
     public double getLng() {
@@ -102,9 +101,7 @@ public class Place implements Parcelable{
     }
 
     public void setLng(double lng) {
-        if (lng > 0) {
-            this.lng = lng;
-        }
+        this.lng = lng;
     }
 
     @Override

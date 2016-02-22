@@ -1,6 +1,7 @@
 package com.yifat.finalproject.Network;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -17,12 +18,12 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
         this.callbacks = callbacks;
     }
 
-    @Override
+    // Runs on the UI thread before doInBackground(Params...)
     protected void onPreExecute() {
         callbacks.onAboutToStart(this);
     }
 
-    @Override
+    // Overriding this method to perform a computation on a background thread
     protected String doInBackground(URL... params) {
 
         InputStream inputStream = null;
@@ -33,16 +34,15 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
 
             URL url = params[0];
 
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
             int httpStatusCode = connection.getResponseCode();
 
-            if(httpStatusCode == HttpURLConnection.HTTP_BAD_REQUEST) {
-                //TODO: figure out
-                errorMessage = "Figure out";
+            if (httpStatusCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                errorMessage = "Bad Http Request";
                 return null;
             }
-            if(httpStatusCode != HttpURLConnection.HTTP_OK) {
+            if (httpStatusCode != HttpURLConnection.HTTP_OK) {
                 errorMessage = connection.getResponseMessage();
                 return null;
             }
@@ -52,43 +52,41 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
             bufferedReader = new BufferedReader(inputStreamReader);
             String result = "";
             String oneLine = bufferedReader.readLine();
-            while(oneLine != null) {
+            while (oneLine != null) {
                 result += oneLine + "\n";
                 oneLine = bufferedReader.readLine();
             }
 
             return result;
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             errorMessage = ex.getMessage();
             return null;
-        }
-
-        finally {
+        } finally {
             try {
                 inputStream.close();
                 inputStreamReader.close();
                 bufferedReader.close();
             } catch (Exception e) {
-
+                Log.e("doInBackground", "Error closing inputStreamReader " + e.toString());
             }
         }
 
     }
 
-    @Override
+    // Runs on the UI thread after doInBackground(Params...)
     protected void onPostExecute(String result) {
-        if(errorMessage != null) {
+        if (errorMessage != null) {
             callbacks.onError(this, errorMessage);
-        }
-        else {
+        } else {
             callbacks.onSuccess(this, result);
         }
     }
 
+    // Callbacks design pattern:
     public interface Callbacks {
         void onAboutToStart(PlacesNearByAsyncTask task);
         void onSuccess(PlacesNearByAsyncTask task, String result);
         void onError(PlacesNearByAsyncTask task, String errorMessage);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.yifat.finalproject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.location.Location;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -13,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
-import com.yifat.finalproject.Helpers.GeneralHelper;
 import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
 import com.yifat.finalproject.Network.PlacesNearByAsyncTask;
@@ -30,16 +30,17 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     public Callbacks callbacks;
     private ArrayList<Place> places;
+    private Location location;
+    private ProgressDialog dialog;
 
     // Required empty public constructor
     public ResultsFragment() {
     }
 
-    private Location location;
-
+    // Setting the location of the user and executing asynctask accordingly
     public void setLocation(Location location) {
 
-        Log.d("","");
+        Log.d("ResultsFragment", "setLocation");
         this.location = location;
         if (this.location == null) {
             return;
@@ -52,11 +53,12 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
             placesNearByAsyncTask.execute(url);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.e("setLocation", "url error " + e.toString());
         }
+
     }
 
-    @Override
+    // Called to have the fragment instantiate its user interface view:
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -65,13 +67,13 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         return view;
     }
 
-    @Override
+    // Called when a fragment is first attached to its activity
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         callbacks = (Callbacks) getActivity();
     }
 
-    @Override
+    // Called when the fragment's activity has been created and this fragment's view hierarchy instantiated
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -80,12 +82,10 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         }
 
         if (savedInstanceState != null) {
-            //TODO: Complete
             Log.d("OnActivityCreated", "savedInstanceState not null");
             places = savedInstanceState.getParcelableArrayList(Constants.STATE_PLACES);
             updateList(places);
             return;
-//            Log.d("Results", "return");
         }
 
         // if no internet, try to load the last saved result
@@ -103,10 +103,8 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    @Override
+    // Implementation of PlaceHolder's Callbacks interface
     public void onClick(Place place) {
-
-//        Toast.makeText(this.getActivity(), place.getName() + ", " + place.getLat() + ", " + place.getLng(), Toast.LENGTH_LONG).show();
 
         if (callbacks != null) {
             callbacks.didClick(this, place);
@@ -114,7 +112,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    @Override
+    // Implementation of PlaceHolder's Callbacks interface
     public void onLongClick(View view, Place place) {
 
         if (callbacks != null) {
@@ -123,13 +121,25 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    @Override
+    // Implementation of PlacesNearByAsyncTask's Callbacks interface
     public void onAboutToStart(PlacesNearByAsyncTask task) {
+
+        if (dialog != null || getActivity() == null) {
+            return;
+        }
+        dialog = new ProgressDialog(getActivity());
+        dialog.setTitle("Connecting...");
+        dialog.setMessage("Please Wait...");
+        dialog.show();
 
     }
 
-    @Override
+    // Implementation of PlacesNearByAsyncTask's Callbacks interface
     public void onSuccess(PlacesNearByAsyncTask task, String result) {
+
+        if (dialog != null){
+            dialog.dismiss();
+        }
 
         if (result != null) {
             updateList(parseJson(result));
@@ -138,11 +148,12 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    @Override
+    // Implementation of PlacesNearByAsyncTask's Callbacks interface
     public void onError(PlacesNearByAsyncTask task, String errorMessage) {
-
+        Toast.makeText(getActivity(), "Error: " + errorMessage, Toast.LENGTH_LONG).show();
     }
 
+    // Parsing the result and creating the arrayList of places
     private ArrayList<Place> parseJson(String result) {
         try {
 
@@ -194,7 +205,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             return places;
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e("ResultsFragment", "Error parsing json " + e.toString());
         }
 
         return null;
@@ -203,16 +214,16 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Callbacks design pattern:
     public interface Callbacks {
         void didClick(ResultsFragment fragment, Place place);
-
         void didLongClick(ResultsFragment fragment, View pressedView, Place place);
     }
 
-    @Override
+    // Called when the fragment is no longer attached to its activity
     public void onDetach() {
         super.onDetach();
         callbacks = null;
     }
 
+    // Put the arrayList in the RecyclerView
     private void updateList(ArrayList<Place> places) {
         if (places == null) {
             return;
@@ -225,23 +236,20 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         if (recyclerViewPlaces == null) {
             return;
         }
-        // Create a linear list of items:
         recyclerViewPlaces.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerViewPlaces.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
 
+    // Calculating the distance between the user's location and a place's Location
     public double calculateDistance(double lat, double lng) {
 
         Location userLocation = this.location;
         if (userLocation == null) {
-            return -1;
+            return -0;
         }
 
-//        userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-//        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
-
-        Location placeLocation = new Location("point B");
+        Location placeLocation = new Location("PlaceLocation");
 
         placeLocation.setLatitude(lat);
         placeLocation.setLongitude(lng);
@@ -252,9 +260,10 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
+    // Executing asynctask according to text entered by the user
     public void searchByTerm(String term) {
 
-        if (this.location== null) {
+        if (this.location == null) {
             return;
         }
 
@@ -264,34 +273,32 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             return;
         }
         try {
-            //TODO: Remove the hardcoded coordinates
-            // DON'T want to deal with the GPS giving crap location
-            // NOT SOMETHING I CAN CONTROL - SO NO POINT DEAL
-            // TLV coordinates are 32.0852999,34.78176759999997
-            String latitude = String.valueOf(this.location.getLatitude());//"32.0852999";//String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-            String longitude = String.valueOf(this.location.getLongitude());//"34.78176759999997";//String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+            String latitude = String.valueOf(this.location.getLatitude());
+            String longitude = String.valueOf(this.location.getLongitude());
             String URLString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&name=" + term + "&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA";
             URL url = new URL(URLString);
             Log.d("SearchByTerm", term);
             PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
             placesNearByAsyncTask.execute(url);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.e("searchByTerm", "url error " + e.toString());
         }
 
     }
 
+    // Managing change in distance format - meters/feet
     public void changeDistanceFormat(Types.DistanceFormat format) {
         RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
         PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewPlaces.getAdapter();
         placeAdapter.setDistanceFormat(format);
     }
 
-    @Override
+    // Called to retrieve per-instance state before the fragment is killed so that the state can be restored in onActivityCreated(Bundle)
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //TODO: Complete
+
         outState.putParcelableArrayList(Constants.STATE_PLACES, places);
+
     }
 
 }
