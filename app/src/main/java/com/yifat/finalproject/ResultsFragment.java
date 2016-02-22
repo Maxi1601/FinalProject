@@ -38,6 +38,8 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     private Location location;
 
     public void setLocation(Location location) {
+
+        Log.d("","");
         this.location = location;
         if (this.location == null) {
             return;
@@ -252,13 +254,22 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     public void searchByTerm(String term) {
 
+        if (this.location== null) {
+            return;
+        }
+
+        if (term == null || term.length() == 0) {
+            // reset the search to previous location
+            this.setLocation(this.location);
+            return;
+        }
         try {
             //TODO: Remove the hardcoded coordinates
             // DON'T want to deal with the GPS giving crap location
             // NOT SOMETHING I CAN CONTROL - SO NO POINT DEAL
             // TLV coordinates are 32.0852999,34.78176759999997
-            String latitude = "32.0852999";//String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-            String longitude = "34.78176759999997";//String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+            String latitude = String.valueOf(this.location.getLatitude());//"32.0852999";//String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+            String longitude = String.valueOf(this.location.getLongitude());//"34.78176759999997";//String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
             String URLString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&name=" + term + "&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA";
             URL url = new URL(URLString);
             Log.d("SearchByTerm", term);
