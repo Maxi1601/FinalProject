@@ -124,8 +124,15 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
     public void callImageAsyncTask () {
 
         URL url = null;
+        if (place == null) {
+            return;
+        }
+        String strURL = place.getUrl();
+        if (strURL == null) {
+            return;
+        }
         try {
-            url = new URL(place.getUrl());
+            url = new URL(strURL);
 
             String stringUrl = url.toString();
 

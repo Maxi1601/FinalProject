@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         if (savedInstanceState != null) {
             resultsFragment = (ResultsFragment) getFragmentManager().getFragment(savedInstanceState, "fragment");
+        } else  {
+            resultsFragment = new ResultsFragment();
+            resultsFragment.callbacks = this;
         }
 
         // Set a toolbar to replace the action bar.
@@ -60,8 +63,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         deviceType = (String) findViewById(R.id.linearLayoutRoot).getTag();
 
         // Creating a resultFragment and setting "this" as the callback:
-        resultsFragment = new ResultsFragment();
-        resultsFragment.callbacks = this;
 
         getFragmentManager()
                 .beginTransaction()

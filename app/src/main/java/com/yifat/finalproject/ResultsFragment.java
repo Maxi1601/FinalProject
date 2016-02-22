@@ -68,17 +68,17 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         }
 
         // if no internet, try to load the last saved result
-        if (GeneralHelper.isInternetAvailable() == false) {
-            String json = PreferencesHelper.loadPlacesJson(getActivity(), Constants.JSON);
-            Log.d("checkJson", json);
-            if (json == null || json.isEmpty()) {
-                Toast.makeText(getActivity(), "no Internet", Toast.LENGTH_SHORT).show();
-                //TODO: complete what happens
-            } else {
-                updateList(parseJson(json));
-            }
-            return;
-        }
+//        if (GeneralHelper.isInternetAvailable() == false) {
+//            String json = PreferencesHelper.loadPlacesJson(getActivity(), Constants.JSON);
+//            Log.d("checkJson", json);
+//            if (json == null || json.isEmpty()) {
+//                Toast.makeText(getActivity(), "no Internet", Toast.LENGTH_SHORT).show();
+//                //TODO: complete what happens
+//            } else {
+//                updateList(parseJson(json));
+//            }
+//            return;
+//        }
 
         // we have internet, load from google
         try {
@@ -243,9 +243,14 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     public void searchByTerm(String term) {
 
         try {
-            String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-            String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
-            URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&name=" + term + "&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
+            //TODO: Remove the hardcoded coordinates
+            // DON'T want to deal with the GPS giving crap location
+            // NOT SOMETHING I CAN CONTROL - SO NO POINT DEAL
+            // TLV coordinates are 32.0852999,34.78176759999997
+            String latitude = "32.0852999";//String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+            String longitude = "34.78176759999997";//String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+            String URLString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&name=" + term + "&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA";
+            URL url = new URL(URLString);
             Log.d("SearchByTerm", term);
             PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
             placesNearByAsyncTask.execute(url);
