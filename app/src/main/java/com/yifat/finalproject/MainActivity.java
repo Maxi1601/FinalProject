@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 //        String provider = LocationManager.NETWORK_PROVIDER;
         String provider = LocationManager.GPS_PROVIDER;
         int milliseconds2Update = 5000; // 5 sec
-        int meters2Update = 10; // 10 meters
+        int meters2Update = 10000; // 10 meters
 
         try {
             locationManager.requestLocationUpdates(provider, milliseconds2Update, meters2Update, this);
@@ -164,12 +164,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     // Called when the location changed (meters or seconds):
     @Override
     public void onLocationChanged(Location location) {
-
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-
-        PreferencesHelper.saveLatitude(this, Constants.LATITUDE, latitude);
-        PreferencesHelper.saveLongitude(this, Constants.LONGITUDE, longitude);
+        resultsFragment.setLocation(location);
+//        double latitude = location.getLatitude();
+//        double longitude = location.getLongitude();
+//
+//        PreferencesHelper.saveLatitude(this, Constants.LATITUDE, latitude);
+//        PreferencesHelper.saveLongitude(this, Constants.LONGITUDE, longitude);
 
 //        loadLocation();
 

@@ -35,6 +35,25 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     public ResultsFragment() {
     }
 
+    private Location location;
+
+    public void setLocation(Location location) {
+        this.location = location;
+        if (this.location == null) {
+            return;
+        }
+        try {
+            String latitude = String.valueOf(location.getLatitude());
+            String longitude = String.valueOf(location.getLongitude());
+            URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
+            Log.d("ResultFragment", url.toString());
+            PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
+            placesNearByAsyncTask.execute(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -79,18 +98,6 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 //            }
 //            return;
 //        }
-
-        // we have internet, load from google
-        try {
-            String latitude = String.valueOf(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-            String longitude = String.valueOf(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
-            URL url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + latitude + "," + longitude + "&radius=500&key=AIzaSyCECLHBTRBDH4mPV-PSeVi7FCT0xhd34XA");
-            Log.d("ResultFragment", url.toString());
-            PlacesNearByAsyncTask placesNearByAsyncTask = new PlacesNearByAsyncTask(this);
-            placesNearByAsyncTask.execute(url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -224,10 +231,13 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     public double calculateDistance(double lat, double lng) {
 
-        Location userLocation = new Location("point A");
+        Location userLocation = this.location;
+        if (userLocation == null) {
+            return -1;
+        }
 
-        userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
-        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
+//        userLocation.setLatitude(PreferencesHelper.loadLatitude(getActivity(), Constants.LATITUDE));
+//        userLocation.setLongitude(PreferencesHelper.loadLongitude(getActivity(), Constants.LONGITUDE));
 
         Location placeLocation = new Location("point B");
 
