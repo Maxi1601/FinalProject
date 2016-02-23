@@ -26,13 +26,16 @@ import com.yifat.finalproject.Helpers.Types;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, ResultsFragment.Callbacks, PopupHelper.FavoritesHelperCallback {
 
+    //region Properties
     private String deviceType;
     private LocationManager locationManager;
     public static FavoritesLogic sharedFavoritesLogic;
     private Toolbar toolbar;
     private ResultsFragment resultsFragment;
     private MapFragment mapFragment;
+    //endregion
 
+    //region onCreate
     // Called when the activity is starting. This is where most initialization should go:
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         // Get the device service for getting the user location:
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-//        String provider = LocationManager.NETWORK_PROVIDER;
         String provider = LocationManager.GPS_PROVIDER;
         int milliseconds2Update = 5000; // 5 sec
         int meters2Update = 10; // 10 meters
@@ -95,7 +97,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
 
     }
+    //endregion
 
+    //region Options Menu
     // Creating OPTIONS MENU:
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -138,6 +142,32 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         return super.onOptionsItemSelected(item);
 
     }
+    //endregion
+
+    // Called when the location changed (meters or seconds)
+    public void onLocationChanged(Location location) {
+
+        if (location == null) {
+            return;
+        }
+        resultsFragment.setLocation(location);
+        locationManager.removeUpdates(this);
+
+    }
+
+    // Called when the provider status changes
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    // Called when the provider is enabled by the user
+    public void onProviderEnabled(String provider) {
+        Toast.makeText(this, provider + " has been enabled", Toast.LENGTH_LONG).show();
+    }
+
+    // Called when the provider is disabled by the user
+    public void onProviderDisabled(String provider) {
+        Toast.makeText(this, provider + " has been disabled", Toast.LENGTH_LONG).show();
+    }
 
     // Called after onRestoreInstanceState(Bundle), onRestart(), or onPause(), for the activity to start interacting with the user
     protected void onResume() {
@@ -165,32 +195,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                         PackageManager.DONT_KILL_APP);
     }
 
-    // Called when the location changed (meters or seconds)
-    public void onLocationChanged(Location location) {
+    // Called to retrieve per-instance state before the activity is killed so that the state can be restored in onCreate(Bundle)
+    protected void onSaveInstanceState(Bundle outState) {
 
-        if (location == null) {
-            return;
+        getFragmentManager().putFragment(outState, "fragment", resultsFragment);
+        if (mapFragment != null) {
+            getSupportFragmentManager().putFragment(outState, "mapFragment", mapFragment);
         }
-        resultsFragment.setLocation(location);
-        locationManager.removeUpdates(this);
+
+        super.onSaveInstanceState(outState);
 
     }
 
-    // Called when the provider status changes
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-    }
-
-    // Called when the provider is enabled by the user
-    public void onProviderEnabled(String provider) {
-        Toast.makeText(this, provider + " has been enabled", Toast.LENGTH_LONG).show();
-    }
-
-    // Called when the provider is disabled by the user
-    public void onProviderDisabled(String provider) {
-        Toast.makeText(this, provider + " has been disabled", Toast.LENGTH_LONG).show();
-    }
-
-    // Implementation of ResultsFragment's Callbacks interface
+    //region ResultsFragment's Callbacks implementation
+    // Called when a place is clicked
     public void didClick(ResultsFragment fragment, Place place) {
 
         if (deviceType.equals("phone")) {
@@ -210,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
     }
 
-    // Implementation of ResultsFragment's Callbacks interface
+    // Called when a place is long clicked
     public void didLongClick(ResultsFragment fragment, View view, Place place) {
 
         if (place == null) {
@@ -222,25 +240,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         popupHelper.showPopup();
 
     }
+    //endregion
 
-    // Implementation of PopupHelper's FavoritesHelperCallback interface
+    //region PopupHelper's FavoritesHelperCallback implementation
+    // Called when a places is added to favorites
     public void didAddFavorite(PopupHelper popupHelper, Place favoritesPlace) {
     }
 
-    // Implementation of PopupHelper's FavoritesHelperCallback interface
+    // Called when a place is removed from favorites
     public void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace) {
     }
-
-    // Called to retrieve per-instance state before the activity is killed so that the state can be restored in onCreate(Bundle)
-    protected void onSaveInstanceState(Bundle outState) {
-
-        getFragmentManager().putFragment(outState, "fragment", resultsFragment);
-        if (mapFragment != null) {
-            getSupportFragmentManager().putFragment(outState, "mapFragment", mapFragment);
-        }
-
-        super.onSaveInstanceState(outState);
-    }
+    //endregion
 
 }
 

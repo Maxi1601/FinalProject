@@ -2,7 +2,6 @@ package com.yifat.finalproject;
 
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,25 +16,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.yifat.finalproject.Helpers.Constants;
 
-import java.util.Random;
-
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
+    //region Properties
     private boolean firstTime = true;
     private Place place;
+    //endregion
 
-//    private SupportMapFragment supportMapFragment;
-
+    //region Construstor
     // Required empty public constructor
     public MapFragment() {
-
     }
+    //endregion
 
+    //region onCreateView
     // Called to have the fragment instantiate its user interface view:
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
         if (savedInstanceState != null) {
@@ -49,8 +47,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return view;
 
     }
+    //endregion
 
-    // Implementation of OnMapReadyCallback interface
+    //region OnMapReadyCallback implementation
+    // Callback interface for when the map is ready to be used
     public void onMapReady(final GoogleMap googleMap) {
 
         // Enable the user tracking
@@ -65,7 +65,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             // this function will perform when the user location is changed:
             public void onMyLocationChange(Location location) {
-                if (!firstTime || place !=null) {
+                if (!firstTime || place != null) {
                     return;
                 }
                 // Take user location:
@@ -88,7 +88,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
     }
+    //endregion
 
+    // Shows a clicked place on the map
     public void setNewPlace(Place place) {
 
         this.place = place;
@@ -103,7 +105,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             GoogleMap googleMap = supportMapFragment.getMap();
             googleMap.clear();
 
-            if ( place == null) {
+            if (place == null) {
                 googleMap.setMyLocationEnabled(true);
                 return;
             }
@@ -125,6 +127,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     // Called to retrieve per-instance state before the fragment is killed so that the state can be restored in onActivityCreated(Bundle)
     public void onSaveInstanceState(Bundle outState) {
+
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(Constants.STATE_MAP, place);

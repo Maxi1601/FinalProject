@@ -29,7 +29,7 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
     //region Constructor
     public PlaceHolder(View relativeLayout, Callbacks callbacks) {
         super(relativeLayout);
-        this.relativeLayout = (RelativeLayout)relativeLayout;
+        this.relativeLayout = (RelativeLayout) relativeLayout;
 
         // itemView is the root element of each item's layout
         // (in our case is the RelativeLayout of the item_place.xml)
@@ -48,6 +48,7 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
     private void bindPlace(Place place) {
         bindPlace(place, Types.DistanceFormat.METER);
     }
+
     // Enter the object data into the ui:
     public void bindPlace(Place place, Types.DistanceFormat format) {
 
@@ -59,19 +60,30 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
         double distance = place.getDistance();
         String units = "m";
 
+        if (format == Types.DistanceFormat.METER && distance >= 1000) {
+            distance = distance / 1000;
+            units = "km";
+        }
+
+        // Convert meters to feet
         if (format == Types.DistanceFormat.FEET) {
-            // Convert meters to feet
             distance = distance * 3.28084;
             units = "ft";
+
+            // One mile = 5280 feet
+            if (distance >= 5280) {
+                distance = distance / 5280;
+                units = "miles";
+            }
         }
+
         textViewDistance.setText(String.format("%.1f", distance) + " " + units);
 
         this.imageViewPlace.setImageBitmap(null);
 
         if (place.placeImage != null) {
             this.imageViewPlace.setImageBitmap(place.placeImage);
-        }
-        else {
+        } else {
             // Put this specific image from recourse
             this.imageViewPlace.setImageResource(R.drawable.no_image);
 
@@ -81,47 +93,7 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
 
     }
 
-    @Override
-    public void onClick(View v) {
-        callbacks.onClick(place);
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        callbacks.onLongClick(v, place);
-        return true;
-    }
-
-    //region Asynctask GetPlaceImage
-    @Override
-    public void onAboutToStart(GetPlaceImageAsyncTask task) {
-
-    }
-
-    @Override
-    public void onSuccess(GetPlaceImageAsyncTask task, Bitmap bitmap) {
-
-        // Was a previous Asynctask
-        if (!task.getUrl().toString().equals(place.getUrl())) {
-            Log.d("PlaceHolder", task.getUrl().toString());
-            return;
-        }
-        this.place.placeImage = bitmap;
-        imageViewPlace.setImageBitmap(bitmap);
-    }
-
-    @Override
-    public void onError(GetPlaceImageAsyncTask task, String errorMessage) {
-
-    }
-    //endregion
-
-    public interface Callbacks {
-        void onClick(Place place);
-        void onLongClick (View view, Place place);
-    }
-
-    public void callImageAsyncTask () {
+    public void callImageAsyncTask() {
 
         URL url = null;
         if (place == null) {
@@ -140,9 +112,54 @@ public class PlaceHolder extends RecyclerView.ViewHolder implements View.OnClick
             getPlaceImageAsyncTask.execute(stringUrl);
 
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.e("callImageAsyncTask", "url error " + e.toString());
         }
 
     }
+
+    //region View.OnClickListener and View.OnLongClickListener interface implementation
+    // Called when a place is clicked
+    public void onClick(View v) {
+        callbacks.onClick(place);
+    }
+
+    // Called when a place is long clicked
+    public boolean onLongClick(View v) {
+        callbacks.onLongClick(v, place);
+        return true;
+    }
+    //endregion
+
+    //region GetPlaceImage's Callbacks implementation
+    // Called when onPreExecute is invoked
+    public void onAboutToStart(GetPlaceImageAsyncTask task) {
+    }
+
+    // Called when onPostExecute is invoked (if errorMassage is null)
+    public void onSuccess(GetPlaceImageAsyncTask task, Bitmap bitmap) {
+
+        // Was a previous Asynctask
+        if (!task.getUrl().toString().equals(place.getUrl())) {
+            Log.d("PlaceHolder", task.getUrl().toString());
+            return;
+        }
+        this.place.placeImage = bitmap;
+        imageViewPlace.setImageBitmap(bitmap);
+
+    }
+
+    // Called when onPostExecute is invoked (if errorMassage isn't null)
+    public void onError(GetPlaceImageAsyncTask task, String errorMessage) {
+        Log.e("onError", "Error executing task " + errorMessage);
+    }
+    //endregion
+
+    //region Interface
+    // Callbacks design pattern:
+    public interface Callbacks {
+        void onClick(Place place);
+        void onLongClick(View view, Place place);
+    }
+    //endregion
 
 }

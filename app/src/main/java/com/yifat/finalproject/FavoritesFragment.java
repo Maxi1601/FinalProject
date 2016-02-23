@@ -9,33 +9,43 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.yifat.finalproject.DataBase.FavoritesLogic;
 import com.yifat.finalproject.Helpers.PopupHelper;
 import com.yifat.finalproject.Helpers.Types;
 
 import java.util.ArrayList;
 
-public class FavoritesFragment extends Fragment implements PlaceHolder.Callbacks, PopupHelper.FavoritesHelperCallback{
+public class FavoritesFragment extends Fragment implements PlaceHolder.Callbacks, PopupHelper.FavoritesHelperCallback {
 
+    //region Properties
     private FavoritesLogic favoritesLogic;
     private ArrayList<Place> allFavorites;
     public Callbacks callbacks;
+    //endregion
 
+    //region Constructor
+    // Required empty public constructor
     public FavoritesFragment() {
-        // Required empty public constructor
+    }
+    //endregion
+
+    // Called when a fragment is first attached to its activity
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        callbacks = (Callbacks) getActivity();
     }
 
-
-    @Override
+    // Called to have the fragment instantiate its UI view:
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_favorites, container, false);
 
         return view;
     }
 
-    @Override
+    // Called when the fragment's activity has been created and this fragment's view hierarchy instantiated
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -47,13 +57,49 @@ public class FavoritesFragment extends Fragment implements PlaceHolder.Callbacks
 
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        callbacks = (Callbacks) getActivity();
+    // Put the updated arrayList in the RecyclerView
+    private void updateList(ArrayList<Place> places) {
+
+        PlaceAdapter adapter = new PlaceAdapter(getActivity(), places, this);
+        RecyclerView recyclerViewFavorites = (RecyclerView) getActivity().findViewById(R.id.recyclerViewFavorites);
+        recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerViewFavorites.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+
     }
 
-    @Override
+    // Remove one favorite
+    public void removeFavorite() {
+
+        allFavorites = favoritesLogic.getAllFavorites();
+        updateList(allFavorites);
+
+    }
+
+    // Remove all favorites
+    public void removeAllFavorites() {
+
+        Log.d("FavoritesFragment", "removeAllFavorites");
+        MainActivity.sharedFavoritesLogic.deleteAllFavorites(null);
+        allFavorites = null;
+        updateList(allFavorites);
+
+    }
+
+    // Managing change in distance format - meters/feet
+    public void changeDistanceFormat(Types.DistanceFormat format) {
+
+        RecyclerView recyclerViewFavorites = (RecyclerView) getActivity().findViewById(R.id.recyclerViewFavorites);
+        if (recyclerViewFavorites == null) {
+            return;
+        }
+        PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewFavorites.getAdapter();
+        placeAdapter.setDistanceFormat(format);
+
+    }
+
+    //region PlaceHolder's Callbacks implementation
+    // Called when a place is clicked
     public void onClick(Place place) {
 
         if (callbacks != null) {
@@ -62,7 +108,7 @@ public class FavoritesFragment extends Fragment implements PlaceHolder.Callbacks
 
     }
 
-    @Override
+    // Called when a place is long clicked
     public void onLongClick(View view, Place place) {
 
         if (callbacks != null) {
@@ -70,57 +116,26 @@ public class FavoritesFragment extends Fragment implements PlaceHolder.Callbacks
         }
 
     }
+    //endregion
 
-    @Override
+    //region PopupHelper's FavoritesHelperCallback implementation
+    // Called when a places is added to favorites
     public void didAddFavorite(PopupHelper popupHelper, Place favoritesPlace) {
-
     }
 
-    @Override
+    // Called when a place is removed from favorites
     public void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace) {
         allFavorites = favoritesLogic.getAllFavorites();
         updateList(allFavorites);
     }
+    //endregion
 
+    //region Interface
     // Callbacks design pattern:
     public interface Callbacks {
         void didClick(FavoritesFragment fragment, Place place);
-        void didLongClick(FavoritesFragment fragment,View pressedView, Place place);
+        void didLongClick(FavoritesFragment fragment, View pressedView, Place place);
     }
-
-    private void updateList(ArrayList<Place> places) {
-
-        // Create a linear list of items:
-
-        PlaceAdapter adapter = new PlaceAdapter(getActivity(), places, this);
-        RecyclerView recyclerViewFavorites = (RecyclerView) getActivity().findViewById(R.id.recyclerViewFavorites);
-        recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerViewFavorites.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-    }
-
-    public void removeFavorite () {
-        allFavorites = favoritesLogic.getAllFavorites();
-        updateList(allFavorites);
-    }
-
-    public void removeAllFavorites () {
-
-        Log.d("FavoritesFragment", "removeAllFavorites");
-        MainActivity.sharedFavoritesLogic.deleteAllFavorites(null);
-        allFavorites = null;
-
-//        allFavorites = favoritesLogic.getAllFavorites();
-        updateList(allFavorites);
-    }
-
-    public void changeDistanceFormat (Types.DistanceFormat format) {
-        RecyclerView recyclerViewFavorites = (RecyclerView) getActivity().findViewById(R.id.recyclerViewFavorites);
-        if (recyclerViewFavorites == null) {
-            return;
-        }
-        PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewFavorites.getAdapter();
-        placeAdapter.setDistanceFormat(format);
-    }
+    //endregion
 
 }

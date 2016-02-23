@@ -89,10 +89,12 @@ public class PopupHelper implements PopupMenu.OnMenuItemClickListener {
 
     }
 
+    //region Interface
     // Creating Interface which can be implemented by any activity/fragment
     public interface FavoritesHelperCallback {
         void didAddFavorite(PopupHelper popupHelper, Place favoritesPlace);
         void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace);
     }
+    //endregion
 
 }

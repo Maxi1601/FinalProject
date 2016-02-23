@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
-import com.yifat.finalproject.Helpers.GeneralHelper;
 import com.yifat.finalproject.Helpers.PreferencesHelper;
 import com.yifat.finalproject.Helpers.Types;
 import com.yifat.finalproject.Network.PlacesNearByAsyncTask;
@@ -29,14 +28,18 @@ import java.util.ArrayList;
 
 public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, PlacesNearByAsyncTask.Callbacks {
 
+    //region Properties
     public Callbacks callbacks;
     private ArrayList<Place> places;
     private Location location;
     private ProgressDialog dialog;
+    //endregion
 
+    //region Constructor
     // Required empty public constructor
     public ResultsFragment() {
     }
+    //endregion
 
     // Setting the location of the user and executing asynctask accordingly
     public void setLocation(Location location) {
@@ -63,19 +66,19 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    // Called to have the fragment instantiate its user interface view:
+    // Called when a fragment is first attached to its activity
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        callbacks = (Callbacks) getActivity();
+    }
+
+    // Called to have the fragment instantiate its UI view:
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_results, container, false);
 
         return view;
-    }
-
-    // Called when a fragment is first attached to its activity
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        callbacks = (Callbacks) getActivity();
     }
 
     // Called when the fragment's activity has been created and this fragment's view hierarchy instantiated
@@ -106,56 +109,6 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 //            return;
 //        }
 
-    }
-
-    // Implementation of PlaceHolder's Callbacks interface
-    public void onClick(Place place) {
-
-        if (callbacks != null) {
-            callbacks.didClick(this, place);
-        }
-
-    }
-
-    // Implementation of PlaceHolder's Callbacks interface
-    public void onLongClick(View view, Place place) {
-
-        if (callbacks != null) {
-            callbacks.didLongClick(this, view, place);
-        }
-
-    }
-
-    // Implementation of PlacesNearByAsyncTask's Callbacks interface
-    public void onAboutToStart(PlacesNearByAsyncTask task) {
-
-        if (dialog != null || getActivity() == null) {
-            return;
-        }
-        dialog = new ProgressDialog(getActivity());
-        dialog.setTitle("Connecting...");
-        dialog.setMessage("Please Wait...");
-        dialog.show();
-
-    }
-
-    // Implementation of PlacesNearByAsyncTask's Callbacks interface
-    public void onSuccess(PlacesNearByAsyncTask task, String result) {
-
-        if (dialog != null){
-            dialog.dismiss();
-        }
-
-        if (result != null) {
-            updateList(parseJson(result));
-            PreferencesHelper.savePlacesJson(getActivity(), Constants.JSON, result);
-        }
-
-    }
-
-    // Implementation of PlacesNearByAsyncTask's Callbacks interface
-    public void onError(PlacesNearByAsyncTask task, String errorMessage) {
-        Toast.makeText(getActivity(), "Error: " + errorMessage, Toast.LENGTH_LONG).show();
     }
 
     // Parsing the result and creating the arrayList of places
@@ -216,19 +169,13 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         return null;
     }
 
-    // Callbacks design pattern:
-    public interface Callbacks {
-        void didClick(ResultsFragment fragment, Place place);
-        void didLongClick(ResultsFragment fragment, View pressedView, Place place);
-    }
-
     // Called when the fragment is no longer attached to its activity
     public void onDetach() {
         super.onDetach();
         callbacks = null;
     }
 
-    // Put the arrayList in the RecyclerView
+    // Put the updated arrayList in the RecyclerView
     private void updateList(ArrayList<Place> places) {
         if (places == null) {
             return;
@@ -265,6 +212,15 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
+    // Managing change in distance format - meters/feet
+    public void changeDistanceFormat(Types.DistanceFormat format) {
+
+        RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
+        PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewPlaces.getAdapter();
+        placeAdapter.setDistanceFormat(format);
+
+    }
+
     // Executing asynctask according to text entered by the user
     public void searchByTerm(String term) {
 
@@ -291,13 +247,6 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     }
 
-    // Managing change in distance format - meters/feet
-    public void changeDistanceFormat(Types.DistanceFormat format) {
-        RecyclerView recyclerViewPlaces = (RecyclerView) getActivity().findViewById(R.id.recyclerViewPlaces);
-        PlaceAdapter placeAdapter = (PlaceAdapter) recyclerViewPlaces.getAdapter();
-        placeAdapter.setDistanceFormat(format);
-    }
-
     // Called to retrieve per-instance state before the fragment is killed so that the state can be restored in onActivityCreated(Bundle)
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -305,5 +254,67 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         outState.putParcelableArrayList(Constants.STATE_PLACES, places);
 
     }
+
+    //region PlaceHolder's Callbacks implementation
+    // Called when a place is clicked
+    public void onClick(Place place) {
+
+        if (callbacks != null) {
+            callbacks.didClick(this, place);
+        }
+
+    }
+
+    // Called when a place is long clicked
+    public void onLongClick(View view, Place place) {
+
+        if (callbacks != null) {
+            callbacks.didLongClick(this, view, place);
+        }
+
+    }
+    //endregion
+
+    //region PlacesNearByAsyncTask's Callbacks implementation
+    // Called when onPreExecute is invoked
+    public void onAboutToStart(PlacesNearByAsyncTask task) {
+
+        if (dialog != null || getActivity() == null) {
+            return;
+        }
+        dialog = new ProgressDialog(getActivity());
+        dialog.setTitle("Connecting...");
+        dialog.setMessage("Please Wait...");
+        dialog.show();
+
+    }
+
+    // Called when onPostExecute is invoked (if errorMassage is null)
+    public void onSuccess(PlacesNearByAsyncTask task, String result) {
+
+        if (dialog != null){
+            dialog.dismiss();
+        }
+
+        if (result != null) {
+            updateList(parseJson(result));
+            PreferencesHelper.savePlacesJson(getActivity(), Constants.JSON, result);
+        }
+
+    }
+
+    // Called when onPostExecute is invoked (if errorMassage isn't null)
+    public void onError(PlacesNearByAsyncTask task, String errorMessage) {
+        Toast.makeText(getActivity(), "Error: " + errorMessage, Toast.LENGTH_LONG).show();
+    }
+    //endregion
+
+    //region Interface
+    // Callbacks design pattern:
+    public interface Callbacks {
+        void didClick(ResultsFragment fragment, Place place);
+        void didLongClick(ResultsFragment fragment, View pressedView, Place place);
+    }
+    //endregion
 
 }

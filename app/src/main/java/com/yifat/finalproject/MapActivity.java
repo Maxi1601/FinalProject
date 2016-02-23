@@ -15,11 +15,14 @@ import com.yifat.finalproject.Helpers.Constants;
 
 public class MapActivity extends AppCompatActivity {
 
+    //region Properties
     private Fragment fragment = null;
     private double lat;
     private double lng;
     private Toolbar toolbar;
+    //endregion
 
+    //region onCreate
     // Called when the activity is starting. This is where most initialization should go:
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +58,9 @@ public class MapActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
+    //endregion
 
+    //region Options menu
     // Creating OPTIONS MENU:
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -97,6 +102,7 @@ public class MapActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
 
     }
+    //endregion
 
     // Called after onRestoreInstanceState(Bundle), onRestart(), or onPause(), for the activity to start interacting with the user
     protected void onResume() {

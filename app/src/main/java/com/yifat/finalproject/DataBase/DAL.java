@@ -14,7 +14,6 @@ public class DAL extends SQLiteOpenHelper {
 
     // Constructor:
     public DAL(Activity activity) {
-
         super(activity, DB.NAME, null, DB.VERSION);
     }
 

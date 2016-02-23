@@ -13,12 +13,12 @@ public abstract class BaseLogic {
         dal = new DAL(activity);
     }
 
-    // Open the database
+    // Opens the database
     public void open() {
         dal.open();
     }
 
-    // close the database
+    // Closes the database
     public void close() {
         dal.close();
     }

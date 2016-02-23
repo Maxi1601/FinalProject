@@ -12,48 +12,50 @@ import java.net.URL;
 
 public class GetPlaceImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
 
+    //region Properties
     private Callbacks callbacks;
     private String errorMessage = null;
     private URL url;
+    //endregion
 
+    //region Constructor
     public GetPlaceImageAsyncTask(Callbacks callbacks) {
         this.callbacks = callbacks;
     }
+    //endregion
 
-    @Override
+    // Runs on the UI thread before doInBackground(Params...)
     protected void onPreExecute() {
         callbacks.onAboutToStart(this);
     }
 
-    @Override
+    // Overriding this method to perform a computation on a background thread
     protected Bitmap doInBackground(String... params) {
 
         Bitmap bitmap = null;
+
         try {
-            // Starting image download
             bitmap = downloadImage(params[0]);
         } catch (Exception e) {
             Log.d("Background Task", e.toString());
         }
+
         return bitmap;
+
     }
 
+    // Downloding Place's image
     private Bitmap downloadImage(String strUrl) throws IOException {
+
         Bitmap bitmap = null;
         InputStream iStream = null;
+
         try {
+
             url = new URL(strUrl);
-
-            /** Creating an http connection to communcate with url */
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-            /** Connecting to url */
             urlConnection.connect();
-
-            /** Reading data from url */
             iStream = urlConnection.getInputStream();
-
-            /** Creating a bitmap from the stream returned from the url */
             bitmap = BitmapFactory.decodeStream(iStream);
 
         } catch (Exception e) {
@@ -61,10 +63,12 @@ public class GetPlaceImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
         } finally {
             iStream.close();
         }
+
         return bitmap;
+
     }
 
-    @Override
+    // Runs on the UI thread after doInBackground(Params...)
     protected void onPostExecute(Bitmap bitmap) {
         if (errorMessage != null) {
             callbacks.onError(this, errorMessage);
@@ -73,14 +77,17 @@ public class GetPlaceImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
         }
     }
 
+    public URL getUrl() {
+        return url;
+    }
+
+    //region Interface
+    // Callbacks design pattern:
     public interface Callbacks {
         void onAboutToStart(GetPlaceImageAsyncTask task);
         void onSuccess(GetPlaceImageAsyncTask task, Bitmap bitmap);
         void onError(GetPlaceImageAsyncTask task, String errorMessage);
     }
-
-    public URL getUrl() {
-        return url;
-    }
+    //endregion
 
 }

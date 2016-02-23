@@ -29,8 +29,6 @@ public class DB {
                 LATITUDE + " NUMERIC, " +
                 LONGITUDE + " NUMERIC" + ")";
 
-        //TODO: make sure that the place is unique (by name+lat+lng is probably good enough).
-
         public static final String DELETION_STATEMENT = "DROP TABLE IF EXISTS " + TABLE_NAME;
     }
 

@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
@@ -19,12 +18,15 @@ import com.yifat.finalproject.Helpers.Types;
 
 public class FavoritesActivity extends AppCompatActivity implements PopupHelper.FavoritesHelperCallback, FavoritesFragment.Callbacks {
 
+    //region Properties
     private Toolbar toolbar;
     private String deviceType;
     private FavoritesFragment favoritesFragment;
     private MapFragment mapFragment;
+    //endregion
 
-    @Override
+    //region onCreate
+    // Called when the activity is starting. This is where most initialization should go:
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
@@ -65,7 +67,9 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
         }
 
     }
+    //endregion
 
+    //region Options Menu
     // Creating OPTIONS MENU:
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -84,9 +88,6 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
                 startActivity(intent);
 
             case R.id.action_search:
-                EditText editTextSearch = (EditText) toolbar.findViewById(R.id.editTextSearch);
-                String term = editTextSearch.getText().toString();
-//                resultsFragment.searchByTerm(term);
                 break;
 
             case R.id.action_favorites:
@@ -111,27 +112,31 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
         return super.onOptionsItemSelected(item);
 
     }
+    //endregion
 
-    @Override
+    //region PopupHelper's FavoritesHelperCallback implementation
+    // Called when a places is added to favorites
     public void didAddFavorite(PopupHelper popupHelper, Place favoritesPlace) {
     }
 
-    @Override
+    // Called when a places is removed from favorites
     public void didRemoveFavorite(PopupHelper popupHelper, Place favoritesPlace) {
 
         favoritesFragment.removeFavorite();
 
     }
+    //endregion
 
-    @Override
+    //region FavoritesFragment's Callbacks implementation
+    // Called when a place is clicked
     public void didClick(FavoritesFragment fragment, Place place) {
 
         if (deviceType.equals("phone")) {
 
-        Intent intent = new Intent(FavoritesActivity.this, MapActivity.class);
-        intent.putExtra(Constants.LATITUDE, place.getLat());
-        intent.putExtra(Constants.LONGITUDE, place.getLng());
-        startActivity(intent);
+            Intent intent = new Intent(FavoritesActivity.this, MapActivity.class);
+            intent.putExtra(Constants.LATITUDE, place.getLat());
+            intent.putExtra(Constants.LONGITUDE, place.getLng());
+            startActivity(intent);
 
         } else if (deviceType.equals("tablet")) {
 
@@ -140,7 +145,7 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
         }
     }
 
-    @Override
+    // Called when a place is long clicked
     public void didLongClick(FavoritesFragment fragment, View pressedView, Place place) {
 
         if (place == null) {
@@ -152,12 +157,14 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
         popupHelper.showPopup();
 
     }
+    //endregion
 
-    @Override
+    // Called after onRestoreInstanceState(Bundle), onRestart(), or onPause(), for the activity to start interacting with the user
     protected void onResume() {
         super.onResume();
         MainActivity.sharedFavoritesLogic.open();
 
+        // Enable BroadcastReceiver when the activity resumes:
         ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,
@@ -165,10 +172,11 @@ public class FavoritesActivity extends AppCompatActivity implements PopupHelper.
                         PackageManager.DONT_KILL_APP);
     }
 
-    @Override
+    // Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed
     protected void onPause() {
         super.onPause();
 
+        // Disable BroadcastReceiver when the activity pauses:
         ComponentName component = new ComponentName(this, PowerReceiver.class);
         getPackageManager()
                 .setComponentEnabledSetting(component,

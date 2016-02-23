@@ -15,11 +15,9 @@ public class PowerReceiver extends BroadcastReceiver{
         if (action.equals(intent.ACTION_POWER_CONNECTED)) {
             Toast.makeText(context, "Power Connected", Toast.LENGTH_LONG).show();
         }
-
         else if (action.equals(intent.ACTION_POWER_DISCONNECTED)){
             Toast.makeText(context, "Power Disconnected", Toast.LENGTH_LONG).show();
         }
-
         else if(action.equals(intent.ACTION_BOOT_COMPLETED)) {
             Intent intent1 = new Intent(context, MainActivity.class);
             intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

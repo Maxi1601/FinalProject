@@ -7,6 +7,7 @@ import android.util.Log;
 
 public class Place implements Parcelable {
 
+    //region Properties
     private long id;
     private String name;
     private String address;
@@ -15,7 +16,9 @@ public class Place implements Parcelable {
     private double lat;
     private double lng;
     public Bitmap placeImage;
+    //endregion
 
+    //region Constructors
     public Place() {
     }
 
@@ -42,7 +45,10 @@ public class Place implements Parcelable {
         this(name, address, distance, url, lat, lng);
         setId(id);
     }
+    //endregion
 
+    //region Getters and Setters
+    // Getters and Setters for all Data Members:
     public long getId() {
         return id;
     }
@@ -103,18 +109,20 @@ public class Place implements Parcelable {
     public void setLng(double lng) {
         this.lng = lng;
     }
+    //endregion
 
-    @Override
+    // Overriding toString method in order to describe an object of type Place:
     public String toString() {
         return name;
     }
 
-    @Override
+    //region Parcelable's Interface implementation
+    // Describes the kinds of special objects contained in this Parcelable's marshalled representation
     public int describeContents() {
         return 0;
     }
 
-    @Override
+    // Flattens this object in to a Parcel
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeString(name);
@@ -124,7 +132,9 @@ public class Place implements Parcelable {
         dest.writeDouble(lat);
         dest.writeDouble(lng);
     }
+    //endregion
 
+    // Creating a static field called CREATOR, which is an object implementing the Parcelable.Creator interface
     public static final Parcelable.Creator<Place> CREATOR
             = new Parcelable.Creator<Place>() {
         public Place createFromParcel(Parcel in) {

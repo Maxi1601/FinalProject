@@ -11,12 +11,16 @@ import java.net.URL;
 
 public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
 
+    //region Properties
     private Callbacks callbacks;
     private String errorMessage = null;
+    //endregion
 
+    //region Constructor
     public PlacesNearByAsyncTask(Callbacks callbacks) {
         this.callbacks = callbacks;
     }
+    //endregion
 
     // Runs on the UI thread before doInBackground(Params...)
     protected void onPreExecute() {
@@ -82,11 +86,13 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
         }
     }
 
+    //region Interface
     // Callbacks design pattern:
     public interface Callbacks {
         void onAboutToStart(PlacesNearByAsyncTask task);
         void onSuccess(PlacesNearByAsyncTask task, String result);
         void onError(PlacesNearByAsyncTask task, String errorMessage);
     }
+    //endregion
 
 }

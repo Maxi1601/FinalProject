@@ -98,7 +98,9 @@ public class FavoritesLogic extends BaseLogic {
         if (cursor.getCount() > 0) {
             return true;
         }
+
         return false;
+
     }
 
 }
