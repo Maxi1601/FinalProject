@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.yifat.finalproject.Helpers.Constants;
@@ -95,6 +96,14 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             updateList(places);
             return;
         }
+
+        dialog = new ProgressDialog(getActivity());
+        dialog.setTitle("Searching for places...");
+        dialog.setMessage("Please Wait");
+        dialog.show();
+
+//        FrameLayout frameLayoutRoot = (FrameLayout) getView().findViewById(R.id.frameLayoutRoot);
+//        frameLayoutRoot.setBackgroundColor(R.drawable.loader);
 
         // if no internet, try to load the last saved result
 //        if (GeneralHelper.isInternetAvailable() == false) {
@@ -279,13 +288,17 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Called when onPreExecute is invoked
     public void onAboutToStart(PlacesNearByAsyncTask task) {
 
-        if (dialog != null || getActivity() == null) {
+//        if (dialog != null || getActivity() == null) {
+//            return;
+//        }
+
+        if (getActivity() == null) {
             return;
         }
-        dialog = new ProgressDialog(getActivity());
-        dialog.setTitle("Connecting...");
-        dialog.setMessage("Please Wait...");
-        dialog.show();
+//        dialog = new ProgressDialog(getActivity());
+//        dialog.setTitle("Connecting...");
+//        dialog.setMessage("Please Wait...");
+//        dialog.show();
 
     }
 
