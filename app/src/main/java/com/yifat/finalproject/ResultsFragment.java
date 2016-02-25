@@ -100,6 +100,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         dialog.setTitle("Searching for places...");
         dialog.setMessage("Please Wait");
         dialog.show();
+        dialog.setCancelable(false);
 
         // if no internet, try to load the last saved result
 //        if (GeneralHelper.isInternetAvailable() == false) {
