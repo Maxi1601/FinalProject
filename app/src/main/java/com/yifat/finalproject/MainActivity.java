@@ -1,6 +1,5 @@
 package com.yifat.finalproject;
 
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,8 +33,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private Toolbar toolbar;
     private ResultsFragment resultsFragment;
     private MapFragment mapFragment;
-//    private ProgressDialog dialog;
-
     //endregion
 
     //region onCreate
@@ -43,11 +40,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        dialog = new ProgressDialog(this);
-//        dialog.setTitle("Connecting...");
-//        dialog.setMessage("Please Wait...");
-//        dialog.show();
 
         if (savedInstanceState != null) {
             resultsFragment = (ResultsFragment) getFragmentManager().getFragment(savedInstanceState, "fragment");
@@ -161,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
         resultsFragment.setLocation(location);
         locationManager.removeUpdates(this);
-//        dialog.dismiss();
 
     }
 
