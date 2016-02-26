@@ -8,10 +8,9 @@ public class Constants {
     public final static String POPUP_ADD = "add to favorites";
     public final static String POPUP_REMOVE = "remove from favorites";
 
-    public static final String JSON = "json";
-    public static final String FAVORITES = "favorites";
-
     public static final String STATE_PLACES = "state places";
     public static final String STATE_MAP = "state map";
+
+    public static final String JSON = "json";
 
 }

@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        String json = PreferencesHelper.loadPlacesJson(this, Constants.JSON);
+        String json = PreferencesHelper.loadLastResult(this, Constants.JSON);
         Log.d("Json", json);
 
         MainActivity.sharedFavoritesLogic = new FavoritesLogic(this);
@@ -173,6 +173,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     // Called after onRestoreInstanceState(Bundle), onRestart(), or onPause(), for the activity to start interacting with the user
     protected void onResume() {
         super.onResume();
+
+        if (sharedFavoritesLogic == null) {
+            return;
+        }
 
         MainActivity.sharedFavoritesLogic.open();
 

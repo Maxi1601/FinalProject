@@ -10,7 +10,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
         android:layout_marginTop="5dp"
-        android:hint="Name"
+        android:hint="@string/place_name"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:gravity="left"/>
 
@@ -21,7 +21,7 @@
         android:layout_below="@+id/textViewName"
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
-        android:hint="Address"
+        android:hint="@string/place_address"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:gravity="left"
         android:textColor="#e16767"/>
@@ -33,7 +33,7 @@
         android:layout_below="@+id/textViewAddress"
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
-        android:hint="Distance"
+        android:hint="@string/place_distance"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:gravity="left"/>
 

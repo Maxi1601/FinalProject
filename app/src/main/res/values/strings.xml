@@ -1,6 +1,16 @@
 <resources>
     <string name="app_name">FinalProject</string>
-
-<!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_search">Enter key words</string>
+    <string name="favorites_header">My Favorites</string>
+    <string name="place_name">Name</string>
+    <string name="place_address">Address</string>
+    <string name="place_distance">Distance</string>
+    <string name="title_search">Search</string>
+    <string name="title_favorites">Favorites</string>
+    <string name="title_meters">Meters</string>
+    <string name="title_feet">Feet</string>
+    <string name="title_delete_all_favorites">Delete All Favorites</string>
+    <string name="title_share">Share</string>
+    <string name="title_null" />
 </resources>

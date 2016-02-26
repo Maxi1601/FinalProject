@@ -15,7 +15,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="My Favorites"
+        android:text="@string/favorites_header"
         android:gravity="center_horizontal"
         android:id="@+id/textViewHeader"
         android:textColor="#FFFFFF"

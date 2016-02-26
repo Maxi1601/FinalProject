@@ -53,6 +53,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         if (this.places != null) {
             return;
         }
+
         try {
             String latitude = String.valueOf(location.getLatitude());
             String longitude = String.valueOf(location.getLongitude());
@@ -102,23 +103,10 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
         dialog.show();
         dialog.setCancelable(false);
 
-        // if no internet, try to load the last saved result
-//        if (GeneralHelper.isInternetAvailable() == false) {
-//            String json = PreferencesHelper.loadPlacesJson(getActivity(), Constants.JSON);
-//            Log.d("checkJson", json);
-//            if (json == null || json.isEmpty()) {
-//                Toast.makeText(getActivity(), "no Internet", Toast.LENGTH_SHORT).show();
-//                //TODO: complete what happens
-//            } else {
-//                updateList(parseJson(json));
-//            }
-//            return;
-//        }
-
     }
 
     // Parsing the result and creating the arrayList of places
-    private ArrayList<Place> parseJson(String result) {
+    public ArrayList<Place> parseJson(String result) {
         try {
 
             places = new ArrayList<>();
@@ -182,7 +170,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     }
 
     // Put the updated arrayList in the RecyclerView
-    private void updateList(ArrayList<Place> places) {
+    public void updateList(ArrayList<Place> places) {
         if (places == null) {
             return;
         }
@@ -289,13 +277,13 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Called when onPostExecute is invoked (if errorMassage is null)
     public void onSuccess(PlacesNearByAsyncTask task, String result) {
 
-        if (dialog != null){
+        if (dialog != null) {
             dialog.dismiss();
         }
 
         if (result != null) {
             updateList(parseJson(result));
-            PreferencesHelper.savePlacesJson(getActivity(), Constants.JSON, result);
+            PreferencesHelper.saveLastResult(getActivity(), Constants.JSON, result);
         }
 
     }

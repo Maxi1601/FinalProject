@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 public class PreferencesHelper {
 
     // Saving last results
-    public static void savePlacesJson(Context context, String key, String value) {
+    public static void saveLastResult(Context context, String key, String value) {
         if (context == null) {
             return;
         }
@@ -20,7 +20,7 @@ public class PreferencesHelper {
     }
 
     // Loading last results (in case there's no internet)
-    public static String loadPlacesJson(Context context, String key) {
+    public static String loadLastResult(Context context, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.JSON, context.MODE_PRIVATE);
         return sharedPreferences.getString(key, "");
     }

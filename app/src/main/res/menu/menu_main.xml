@@ -5,33 +5,33 @@
     <item
         android:id="@+id/action_search"
         android:orderInCategory="200"
-        android:title="Search"
+        android:title="@string/title_search"
         android:icon="@drawable/ic_search_black_24dp"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_favorites"
         android:orderInCategory="300"
-        android:title="Favorites"
+        android:title="@string/title_favorites"
         android:icon="@drawable/ic_favorite_black_24dp"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/km"
         android:orderInCategory="100"
-        android:title="Meters"
+        android:title="@string/title_meters"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/miles"
         android:orderInCategory="100"
-        android:title="Feet"
+        android:title="@string/title_feet"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/deleteAllFavorites"
         android:orderInCategory="101"
-        android:title="Delete All Favorites"
+        android:title="@string/title_delete_all_favorites"
         app:showAsAction="never"/>
 
 </menu>
