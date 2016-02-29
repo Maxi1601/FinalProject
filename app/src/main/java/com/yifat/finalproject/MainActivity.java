@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -41,6 +42,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Get the device service for getting the user location:
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        String provider = locationManager.getBestProvider(criteria, true); // true = only enabled providers
+
+        int milliseconds2Update = 5000; // 5 sec
+        int meters2Update = 10; // 10 meters
+
+        try {
+            locationManager.requestLocationUpdates(provider, milliseconds2Update, meters2Update, this);
+        } catch (SecurityException e) {
+            Log.e("locationManager", "SecurityException " + e.toString());
+        }
 
         if (savedInstanceState != null) {
             resultsFragment = (ResultsFragment) getFragmentManager().getFragment(savedInstanceState, "fragment");
@@ -84,20 +101,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                     .replace(R.id.frameLayoutContainerMap, mapFragment)
                     .commit();
 
-        }
-
-        // Get the device service for getting the user location:
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        String provider = LocationManager.GPS_PROVIDER;
-
-        int milliseconds2Update = 5000; // 5 sec
-        int meters2Update = 10; // 10 meters
-
-        try {
-            locationManager.requestLocationUpdates(provider, milliseconds2Update, meters2Update, this);
-        } catch (SecurityException e) {
-            Log.e("locationManager", "SecurityException " + e.toString());
         }
 
     }
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         }
 
         try {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                 resultsFragment.setLocation(location);
                 locationManager.removeUpdates(this);
