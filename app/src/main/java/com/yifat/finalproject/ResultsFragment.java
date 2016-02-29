@@ -46,6 +46,7 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
         Log.d("ResultsFragment", "setLocation");
         this.location = location;
+
         if (this.location == null) {
             return;
         }
@@ -79,6 +80,12 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
         View view = inflater.inflate(R.layout.fragment_results, container, false);
 
+        dialog = new ProgressDialog(getActivity());
+        dialog.setTitle("Searching for places...");
+        dialog.setMessage("Please Wait");
+        dialog.show();
+        dialog.setCancelable(false);
+
         return view;
     }
 
@@ -94,14 +101,21 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
             Log.d("OnActivityCreated", "savedInstanceState not null");
             places = savedInstanceState.getParcelableArrayList(Constants.STATE_PLACES);
             updateList(places);
+
+            try {
+                if ((this.dialog != null) && this.dialog.isShowing()) {
+                    this.dialog.dismiss();
+                }
+            } catch (final IllegalArgumentException e) {
+                Log.e("onError", "IllegalArgumentException " + e.toString());
+            } catch (final Exception e) {
+                Log.e("onError", "Exception " + e.toString());
+            } finally {
+                this.dialog = null;
+            }
+
             return;
         }
-
-        dialog = new ProgressDialog(getActivity());
-        dialog.setTitle("Searching for places...");
-        dialog.setMessage("Please Wait");
-        dialog.show();
-        dialog.setCancelable(false);
 
     }
 
@@ -277,8 +291,16 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
     // Called when onPostExecute is invoked (if errorMassage is null)
     public void onSuccess(PlacesNearByAsyncTask task, String result) {
 
-        if (dialog != null) {
-            dialog.dismiss();
+        try {
+            if ((this.dialog != null) && this.dialog.isShowing()) {
+                this.dialog.dismiss();
+            }
+        } catch (final IllegalArgumentException e) {
+            Log.e("onSuccess", "IllegalArgumentException " + e.toString());
+        } catch (final Exception e) {
+            Log.e("onSuccess", "Exception " + e.toString());
+        } finally {
+            this.dialog = null;
         }
 
         if (result != null) {
@@ -290,7 +312,20 @@ public class ResultsFragment extends Fragment implements PlaceHolder.Callbacks, 
 
     // Called when onPostExecute is invoked (if errorMassage isn't null)
     public void onError(PlacesNearByAsyncTask task, String errorMessage) {
+
         Toast.makeText(getActivity(), "Error: " + errorMessage, Toast.LENGTH_LONG).show();
+
+        try {
+            if ((this.dialog != null) && this.dialog.isShowing()) {
+                this.dialog.dismiss();
+            }
+        } catch (final IllegalArgumentException e) {
+            Log.e("onError", "IllegalArgumentException " + e.toString());
+        } catch (final Exception e) {
+            Log.e("onError", "Exception " + e.toString());
+        } finally {
+            this.dialog = null;
+        }
     }
     //endregion
 

@@ -84,6 +84,7 @@ public class PlacesNearByAsyncTask extends AsyncTask<URL, Void, String> {
         } else {
             callbacks.onSuccess(this, result);
         }
+
     }
 
     //region Interface
